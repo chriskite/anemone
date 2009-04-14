@@ -1,0 +1,165 @@
+require 'anemone/http'
+require 'hpricot'
+
+module Anemone
+  class Page
+    # The URL of the page
+    attr_reader :url
+    # Array of distinct A tag HREFs from the page
+    attr_reader :links
+    # Integer response code of the page
+    attr_reader :code
+    
+    # Array of redirect-aliases for the page
+    attr_accessor :aliases
+    # Boolean indicating whether or not this page has been visited in PageHash#shortest_paths!
+    attr_accessor :visited
+    # Used by PageHash#shortest_paths! to store depth of the page
+    attr_accessor :depth
+    
+    #
+    # Create a new Page from the response of an HTTP request to *url*
+    #
+    def self.fetch(url)
+      begin
+        url = URI(url) if url.is_a?(String)
+
+        response, code, location = Anemone::HTTP.get(url)
+
+        aka = nil
+        if !url.eql?(location)
+          aka = location
+        end
+
+        return Page.new(url, response, code, aka)
+      rescue
+        return Page.new(url)
+      end
+    end
+    
+    #
+    # Create a new page
+    #
+    def initialize(url, response = nil, code = nil, aka = nil)
+      @url = url
+      @response = response
+      @code = code
+      @links = []
+      @aliases = []
+      
+      @aliases << aka if !aka.nil?
+      
+      #get a list of distinct links on the page, in absolute url form
+      if @response and @response.body
+        Hpricot(@response.body).search('a').each do |a| 
+          u = a['href']
+          next if u.nil?
+          
+          begin
+            u = URI(u)
+          rescue
+            next
+          end
+          
+          abs = to_absolute(u) 
+          @links << abs if in_domain?(abs)
+        end
+        
+        @links.uniq!
+      end
+    end
+    
+    
+    #
+    # Return a new page with the same *response* and *url*, but
+    # with a 200 response code
+    #    
+    def alias_clone(url)
+      Page.new(url, @response, 200, @url)
+    end
+
+    #
+    # Add a redirect-alias String *aka* to the list of the page's aliases
+    #
+    # Returns *self*
+    #
+    def add_alias!(aka)
+      @aliases << aka if !@aliases.include?(aka)
+      self
+    end
+    
+    #
+    # Returns an Array of all links from this page, and all the 
+    # redirect-aliases of those pages, as String objects.
+    #
+    # *page_hash* is a PageHash object with the results of the current crawl.
+    #
+    def links_and_their_aliases(page_hash)
+      @links.inject([]) do |results, link|
+        results.concat([link].concat(page_hash[link].aliases))
+      end
+    end
+
+    #
+    # Returns the response body for the page
+    #
+    def body
+      @response.body
+    end
+    
+    #
+    # Returns the +Content-Type+ header for the page
+    #
+    def content_type
+      @response['Content-Type']
+    end
+    
+    #
+    # Returns +true+ if the page is a HTML document, returns +false+
+    # otherwise.
+    #
+    def html?
+      (content_type =~ /text\/html/) == 0
+    end
+    
+    #
+    # Returns +true+ if the page is a HTTP redirect, returns +false+
+    # otherwise.
+    #    
+    def redirect?
+      (300..399).include?(@code)
+    end
+    
+    #
+    # Returns +true+ if the page was not found (returned 404 code),
+    # returns +false+ otherwise.
+    #
+    def not_found?
+      404 == @code
+    end
+    
+    #
+    # Converts relative URL *link* into an absolute URL based on the
+    # location of the page
+    #
+    def to_absolute(link)
+      # remove anchor
+      link = URI.encode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,''))
+
+      relative = URI(link)
+      absolute = @url.merge(relative)
+
+      absolute.path = '/' if absolute.path.empty?
+
+      return absolute
+    end
+    
+    #
+    # Returns +true+ if *uri* is in the same domain as the page, returns
+    # +false+ otherwise
+    #
+    def in_domain?(uri)
+      uri.host == @url.host
+    end
+  end
+end

@@ -1,0 +1,18 @@
+= Anemone
+
+== DESCRIPTION
+Anemone is a web spider framework that can spider a domain and collect useful
+information about the pages it visits. It is versatile, allowing you to
+write your own specialized spider tasks quickly and easily.
+
+== FEATURES
+* Multi-threaded design for high performance
+* Tracks 301 HTTP redirects to understand a page's aliases
+* Built-in BFS algorithm for determining page depth
+* Allows exclusion of URLs based on regular expressions
+
+== REQUIREMENTS
+* hpricot
+
+== EXAMPLES
+See the +bin+ directory for several examples of useful Anemone tasks.
