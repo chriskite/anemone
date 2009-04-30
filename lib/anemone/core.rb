@@ -11,10 +11,9 @@ module Anemone
     #
     # Initialize the crawl with a starting *url*, *options*, and optional *block*
     #
-    def initialize(url, options={}, &block)
+    def initialize(url, &block)
       url = URI(url) if url.is_a?(String)
       @url = url
-      @options = options
       @tentacles = []
       @pages = PageHash.new
       @on_every_page_blocks = []
@@ -22,17 +21,14 @@ module Anemone
       @skip_link_patterns = []
       @after_crawl_blocks = []
       
-      @options[:threads] ||= 4
-      @options[:verbose] ||= false
-      
       block.call(self) if block
     end
     
     #
     # Convenience method to start a new crawl
     #
-    def self.crawl(root, options={}, &block)
-      self.new(root, options) do |core|
+    def self.crawl(root, &block)
+      self.new(root) do |core|
         block.call(core) if block
         core.run
         core.do_after_crawl_blocks
@@ -91,7 +87,7 @@ module Anemone
       link_queue = Queue.new
       page_queue = Queue.new
 
-      @options[:threads].times do |id|
+      Anemone.options.threads.times do |id|
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue).run }
       end
       
@@ -104,7 +100,7 @@ module Anemone
         
         @pages[page.url] = page
         
-        puts "#{page.url} Queue: #{link_queue.size}" if @options[:verbose]
+        puts "#{page.url} Queue: #{link_queue.size}" if Anemone.options.verbose
         
         do_page_blocks(page)
         

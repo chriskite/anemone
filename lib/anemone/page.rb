@@ -7,9 +7,13 @@ module Anemone
     attr_reader :url
     # Array of distinct A tag HREFs from the page
     attr_reader :links
-    # Integer response code of the page
-    attr_reader :code
+	#Body of the HTTP response
+	attr_reader :body
+	#Content-type of the  HTTP response
+	attr_reader :content_type
     
+    # Integer response code of the page
+    attr_accessor :code	
     # Array of redirect-aliases for the page
     attr_accessor :aliases
     # Boolean indicating whether or not this page has been visited in PageHash#shortest_paths!
@@ -31,7 +35,7 @@ module Anemone
           aka = location
         end
 
-        return Page.new(url, response, code, aka)
+        return Page.new(url, response.body, code, response['Content-Type'], aka)
       rescue
         return Page.new(url)
       end
@@ -40,18 +44,19 @@ module Anemone
     #
     # Create a new page
     #
-    def initialize(url, response = nil, code = nil, aka = nil)
+    def initialize(url, body = nil, code = nil, content_type = nil, aka = nil)
       @url = url
-      @response = response
+	  @body = body unless Anemone.options.discard_page_bodies
       @code = code
+	  @content_type = content_type
       @links = []
       @aliases = []
       
       @aliases << aka if !aka.nil?
       
       #get a list of distinct links on the page, in absolute url form
-      if @response and @response.body
-        Hpricot(@response.body).search('a').each do |a| 
+      if body
+        Hpricot(body).search('a').each do |a| 
           u = a['href']
           next if u.nil?
           
@@ -75,7 +80,10 @@ module Anemone
     # with a 200 response code
     #    
     def alias_clone(url)
-      Page.new(url, @response, 200, @url)
+      p = clone
+	  p.add_alias!(@aka)
+	  p.code = 200
+	  p
     end
 
     #
@@ -99,27 +107,13 @@ module Anemone
         results.concat([link].concat(page_hash[link].aliases))
       end
     end
-
-    #
-    # Returns the response body for the page
-    #
-    def body
-      @response.body
-    end
-    
-    #
-    # Returns the +Content-Type+ header for the page
-    #
-    def content_type
-      @response['Content-Type']
-    end
     
     #
     # Returns +true+ if the page is a HTML document, returns +false+
     # otherwise.
     #
     def html?
-      (content_type =~ /text\/html/) == 0
+      (@content_type =~ /text\/html/) == 0
     end
     
     #
