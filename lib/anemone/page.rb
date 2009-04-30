@@ -81,7 +81,7 @@ module Anemone
     #    
     def alias_clone(url)
       p = clone
-	  p.add_alias!(@aka)
+	  p.add_alias!(@aka) if !@aka.nil?
 	  p.code = 200
 	  p
     end
