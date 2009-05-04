@@ -11,6 +11,14 @@ module Anemone
 	attr_reader :body
 	#Content-type of the  HTTP response
 	attr_reader :content_type
+	#title of the page if it is an HTML document
+	attr_reader :title
+	#first h1 on the page, if present
+	attr_reader :h1
+	#first h2 on the page, if present
+	attr_reader :h2
+	#meta-description of the page, if present
+	attr_reader :description
     
     # Integer response code of the page
     attr_accessor :code	
@@ -54,9 +62,27 @@ module Anemone
       
       @aliases << aka if !aka.nil?
       
+	  h = Hpricot(body)
+	  
+	  #save page title
+	  title_elem = h.at('title')
+	  @title = title_elem.inner_html if !title_elem.nil?
+	  
+	  #save page h1
+	  h1_elem = h.at('h1')
+	  @h1 = h1_elem.inner_html if !h1_elem.nil?	  
+	  
+	  #save page h2
+	  h2_elem = h.at('h2')
+	  @h2 = h2_elem.inner_html if !h2_elem.nil?
+	  
+	  #save page meta-description
+	  description_elem = h.at('meta[@name=description]')
+	  @description = description_elem['content'] if !description_elem.nil?
+	  
       #get a list of distinct links on the page, in absolute url form
       if body
-        Hpricot(body).search('a').each do |a| 
+        h.search('a').each do |a| 
           u = a['href']
           next if u.nil?
           
