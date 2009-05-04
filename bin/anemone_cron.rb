@@ -40,7 +40,7 @@ opts.parse!(ARGV)
 
 root = ARGV.last
 
-Anemone.crawl(root) do |anemone|  
+Anemone.crawl(root, {:discard_page_bodies => true}) do |anemone|  
   
   anemone.after_crawl do |pages|
     puts "Crawl results for #{root}\n"

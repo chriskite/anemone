@@ -29,8 +29,8 @@ module Anemone
 	#disable verbose output by default
     Anemone.options.verbose ||= false
 	
-	#by default, throw away the page response body after scanning it for links, to save memory
-	Anemone.options.discard_page_bodies ||= true
+	#by default, don't throw away the page response body after scanning it for links
+	Anemone.options.discard_page_bodies ||= false
 	
     Core.crawl(url, &block)
   end
