@@ -7,18 +7,18 @@ module Anemone
     attr_reader :url
     # Array of distinct A tag HREFs from the page
     attr_reader :links
-	#Body of the HTTP response
-	attr_reader :body
-	#Content-type of the  HTTP response
-	attr_reader :content_type
-	#title of the page if it is an HTML document
-	attr_reader :title
-	#first h1 on the page, if present
-	attr_reader :h1
-	#first h2 on the page, if present
-	attr_reader :h2
-	#meta-description of the page, if present
-	attr_reader :description
+    #Body of the HTTP response
+    attr_reader :body
+    #Content-type of the  HTTP response
+    attr_reader :content_type
+    #title of the page if it is an HTML document
+    attr_reader :title
+    #first h1 on the page, if present
+    attr_reader :h1
+    #first h2 on the page, if present
+    attr_reader :h2
+    #meta-description of the page, if present
+    attr_reader :description
     
     # Integer response code of the page
     attr_accessor :code	
@@ -54,45 +54,44 @@ module Anemone
     #
     def initialize(url, body = nil, code = nil, content_type = nil, aka = nil)
       @url = url
-	  @body = body unless Anemone.options.discard_page_bodies
+      @body = body unless Anemone.options.discard_page_bodies
       @code = code
-	  @content_type = content_type
+      @content_type = content_type
       @links = []
       @aliases = []
       
       @aliases << aka if !aka.nil?
 
       if body
-		h = Hpricot(body)	  
-	  
-		#save page title
-		title_elem = h.at('title')
-		@title = title_elem.inner_html if !title_elem.nil?
+        h = Hpricot(body)	  
 
-		#save page h1
-		h1_elem = h.at('h1')
-		@h1 = h1_elem.inner_html if !h1_elem.nil?	  
+        #save page title
+        title_elem = h.at('title')
+        @title = title_elem.inner_html if !title_elem.nil?
 
-		#save page h2
-		h2_elem = h.at('h2')
-		@h2 = h2_elem.inner_html if !h2_elem.nil?
+        #save page h1
+        h1_elem = h.at('h1')
+        @h1 = h1_elem.inner_html if !h1_elem.nil?	  
 
-		#save page meta-description
-		description_elem = h.at('meta[@name=description]')
-		@description = description_elem['content'] if !description_elem.nil?	  
-	  
-		#get a list of distinct links on the page, in absolute url form
+        #save page h2
+        h2_elem = h.at('h2')
+        @h2 = h2_elem.inner_html if !h2_elem.nil?
+
+        #save page meta-description
+        description_elem = h.at('meta[@name=description]')
+        @description = description_elem['content'] if !description_elem.nil?	  
+
+        #get a list of distinct links on the page, in absolute url form
         h.search('a').each do |a| 
           u = a['href']
           next if u.nil?
           
           begin
-            u = URI(u)
+            abs = to_absolute(URI(u))
           rescue
             next
           end
-          
-          abs = to_absolute(u) 
+
           @links << abs if in_domain?(abs)
         end
         
@@ -107,9 +106,9 @@ module Anemone
     #    
     def alias_clone(url)
       p = clone
-	  p.add_alias!(@aka) if !@aka.nil?
-	  p.code = 200
-	  p
+	    p.add_alias!(@aka) if !@aka.nil?
+	    p.code = 200
+	    p
     end
 
     #
