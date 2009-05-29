@@ -12,13 +12,18 @@
 $:.unshift File.join(File.dirname(__FILE__), "..", "lib")
 
 require 'anemone'
-require 'rdoc/usage'
+
+def usage
+  puts <<END
+Usage: anemone_pagedepth.rb url
+END
+end
 
 # make sure that the first option is a URL we can crawl
 begin
   URI(ARGV[0])
 rescue
-  RDoc::usage()
+  usage
   Process.exit 
 end
 

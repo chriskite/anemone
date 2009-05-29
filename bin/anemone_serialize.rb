@@ -16,14 +16,22 @@ $:.unshift File.join(File.dirname(__FILE__), "..", "lib")
 
 require 'anemone'
 require 'optparse'
-require 'rdoc/usage'
 require 'ostruct'
+
+def usage
+  puts <<END
+Usage: anemone_serialize.rb [options] url
+
+Options:
+  -o, --output filename      Filename to save PageHash to. Defaults to crawl.{Time.now}
+END
+end
 
 # make sure that the first option is a URL we can crawl
 begin
   URI(ARGV[0])
 rescue
-  RDoc::usage()
+  usage
   Process.exit 
 end
 

@@ -17,8 +17,17 @@ $:.unshift File.join(File.dirname(__FILE__), "..", "lib")
 
 require 'anemone'
 require 'optparse'
-require 'rdoc/usage'
 require 'ostruct'
+
+def usage
+  puts <<END
+Usage: anemone_url_list.rb [options] url
+
+Options:
+  -r, --relative           Output relative URLs (rather than absolute)
+  -o, --output filename    Filename to save URL list to. Defautls to urls.txt.
+END
+end
 
 options = OpenStruct.new
 options.relative = false
@@ -28,7 +37,7 @@ options.output_file = 'urls.txt'
 begin
   URI(ARGV.last)
 rescue
-  RDoc::usage()
+  usage
   Process.exit 
 end
 
