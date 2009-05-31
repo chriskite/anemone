@@ -152,8 +152,10 @@ module Anemone
         blk.call(page)
       end
       
-      @on_pages_like_blocks.each do |pattern, blk|
-        blk.call(page) if page.url.to_s =~ pattern
+      @on_pages_like_blocks.each do |pattern, blks|
+        if page.url.to_s =~ pattern
+          blks.each { |blk| blk.call(page) }
+        end
       end
     end      
     
