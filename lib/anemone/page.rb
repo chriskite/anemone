@@ -53,7 +53,10 @@ module Anemone
       @content_type = content_type
       @links = []
       @aliases = []
-      
+	  
+	  #create empty storage for OpenStructable
+      update({})
+	  
       @aliases << aka if !aka.nil?
 
       if body
@@ -90,9 +93,9 @@ module Anemone
     #    
     def alias_clone(url)
       p = clone
-	    p.add_alias!(@aka) if !@aka.nil?
-	    p.code = 200
-	    p
+	  p.add_alias!(@aka) if !@aka.nil?
+	  p.code = 200
+	  p
     end
 
     #
