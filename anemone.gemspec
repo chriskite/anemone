@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s| 
   s.name = "anemone"
-  s.version = "0.0.3"
+  s.version = "0.0.4"
   s.author = "Chris Kite"
   s.homepage = "http://anemone.rubyforge.org"
   s.rubyforge_project = "anemone"
@@ -12,5 +12,6 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = true
   s.rdoc_options << '-m' << 'README.txt' << '-t' << 'Anemone'
   s.extra_rdoc_files = ["README.txt"]
-  s.add_dependency("hpricot", ">= 0.7.0")
+  s.add_dependency("nokogiri", ">= 1.3.0")
+  s.add_dependency("facets", ">= 2.5.0")
 end
