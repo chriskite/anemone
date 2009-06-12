@@ -54,7 +54,7 @@ module Anemone
       @links = []
       @aliases = []
 	  
-	  #create empty storage for OpenStructable
+      #create empty storage for OpenStructable
       update({})
 	  
       @aliases << aka if !aka.nil?
@@ -70,7 +70,7 @@ module Anemone
 
         #get a list of distinct links on the page, in absolute url form
         @doc.css('a').each do |a| 
-          u = a.attribute('href')
+          u = a.attributes['href'].content if a.attributes['href']
           next if u.nil?
           
           begin
