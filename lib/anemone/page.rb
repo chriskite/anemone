@@ -1,8 +1,11 @@
 require 'anemone/http'
 require 'nokogiri'
+require 'facets/ostructable'
 
 module Anemone
   class Page
+    include OpenStructable
+
     # The URL of the page
     attr_reader :url
     # Array of distinct A tag HREFs from the page
@@ -10,8 +13,8 @@ module Anemone
     #Content-type of the  HTTP response
     attr_reader :content_type
     
-    #Body of the HTTP response
-    attr_accessor :body
+    #Nokogiri document for the HTML body
+    attr_accessor :doc
     # Integer response code of the page
     attr_accessor :code	
     # Array of redirect-aliases for the page
@@ -46,7 +49,6 @@ module Anemone
     #
     def initialize(url, body = nil, code = nil, content_type = nil, aka = nil)
       @url = url
-      @body = body
       @code = code
       @content_type = content_type
       @links = []
@@ -55,10 +57,16 @@ module Anemone
       @aliases << aka if !aka.nil?
 
       if body
-        doc = Nokogiri::HTML(body)
+        begin
+          @doc = Nokogiri::HTML(body)
+        rescue
+          return
+        end
+
+        return if @doc.nil?
 
         #get a list of distinct links on the page, in absolute url form
-        doc.css('a').each do |a| 
+        @doc.css('a').each do |a| 
           u = a.attribute('href')
           next if u.nil?
           
