@@ -12,7 +12,8 @@ write your own specialized spider tasks quickly and easily.
 * Allows exclusion of URLs based on regular expressions
 
 == REQUIREMENTS
-* hpricot
+* nokogiri
+* facets
 
 == EXAMPLES
 See the +bin+ directory for several examples of useful Anemone tasks.
