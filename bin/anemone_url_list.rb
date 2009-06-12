@@ -43,7 +43,7 @@ opts = OptionParser.new
 opts.on('-r', '--relative') { options.relative = true }
 opts.parse!(ARGV)
 
-Anemone.crawl(ARGV.last) do |anemone|  
+Anemone.crawl(ARGV.last, :discard_page_bodies => true) do |anemone|  
   anemone.on_every_page do |page|
     if options.relative
       puts page.url.path

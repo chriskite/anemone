@@ -103,6 +103,8 @@ module Anemone
         puts "#{page.url} Queue: #{link_queue.size}" if Anemone.options.verbose
         
         do_page_blocks(page)
+
+        page.body = nil if Anemone.options.discard_page_bodies
         
         page.links.each do |link| 
           if visit_link?(link)
@@ -131,7 +133,7 @@ module Anemone
         end
         
       end
-      
+
       @tentacles.each { |t| t.join }
 
       self
