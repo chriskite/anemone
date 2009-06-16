@@ -13,7 +13,6 @@ write your own specialized spider tasks quickly and easily.
 
 == REQUIREMENTS
 * nokogiri
-* facets
 
 == EXAMPLES
 See the +bin+ directory for several examples of useful Anemone tasks.

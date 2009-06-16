@@ -1,10 +1,9 @@
 require 'anemone/http'
 require 'nokogiri'
-require 'facets/ostructable'
+require 'ostruct'
 
 module Anemone
   class Page
-    include OpenStructable
 
     # The URL of the page
     attr_reader :url
@@ -13,6 +12,8 @@ module Anemone
     #Content-type of the  HTTP response
     attr_reader :content_type
     
+    #OpenStruct for user-stored data
+    attr_accessor :data
     #Nokogiri document for the HTML body
     attr_accessor :doc
     # Integer response code of the page
@@ -53,9 +54,7 @@ module Anemone
       @content_type = content_type
       @links = []
       @aliases = []
-	  
-      #create empty storage for OpenStructable
-      update({})
+      @data = OpenStruct.new
 	  
       @aliases << aka if !aka.nil?
 
