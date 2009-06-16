@@ -59,29 +59,27 @@ Anemone.crawl(root, {:discard_page_bodies => true}) do |anemone|
     pages.each_value do |page|
       url = page.url.to_s
       not_found << url if page.not_found?
-    end    
-    if !not_found.empty?
+    end
+    unless not_found.empty?
       puts "\n404's:"
-      not_found.each do |url| 
+
+      missing_links = pages.urls_linking_to(not_found)
+      missing_links.each do |url, links|
         if options.relative
           puts URI(url).path.to_s
-        else 
+        else
           puts url
         end
-        num_linked_from = 0
-        pages.urls_linking_to(url).each do |u|
+        links.slice(0..10).each do |u|
           u = u.path if options.relative
-          num_linked_from += 1
           puts "  linked from #{u}"
-          if num_linked_from > 10
-            puts "  ..."
-            break
-          end
         end
+        
+        puts " ..." if missing_links.size > 10
       end
-      
+
       print "\n"
-    end    
+    end  
     
     # remove redirect aliases, and calculate pagedepths
     pages = pages.shortest_paths!(root).uniq

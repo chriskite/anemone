@@ -61,23 +61,56 @@ module Anemone
     end
     
     #
-    # Return an Array of Page objects which link to the given url
+    # If given a single URL (as a String or URI), returns an Array of Pages which link to that URL
+    # If given an Array of URLs, returns a Hash (URI => [Page, Page...]) of Pages linking to those URLs
     #
-    def pages_linking_to url
-      begin
-        url = URI(url) if url.is_a?(String)
-      rescue
-        return []
+    def pages_linking_to(urls)
+      unless urls.is_a?(Array)
+        urls = [urls] unless urls.is_a?(Array)
+        single = true
       end
-      
-      values.delete_if { |p| !p.links.include?(url) }
+
+      urls.map! do |url|
+        if url.is_a?(String)
+          URI(url) rescue nil
+        else
+          url
+        end
+      end
+      urls.compact
+
+      links = {}
+      urls.each { |url| links[url] = [] }
+      values.each do |page|
+        urls.each { |url| links[url] << page if page.links.include?(url) }
+      end
+
+      if single and !links.empty?
+        return links.first
+      else
+        return links
+      end
     end
-    
+
     #
-    # Return an Array of URI objects of Pages linking to the given url
-    def urls_linking_to url
-      pages_linking_to(url).map{|p| p.url}
+    # If given a single URL (as a String or URI), returns an Array of URLs which link to that URL
+    # If given an Array of URLs, returns a Hash (URI => [URI, URI...]) of URLs linking to those URLs
+    #
+    def urls_linking_to(urls)
+      unless urls.is_a?(Array)
+        urls = [urls] unless urls.is_a?(Array)
+        single = true
+      end
+
+      links = pages_linking_to(urls)
+      links.each { |url, pages| links[url] = pages.map{|p| p.url} }
+
+      if single and !links.empty?
+        return links.first
+      else
+        return links
+      end	  
     end
-    
+
   end
 end
