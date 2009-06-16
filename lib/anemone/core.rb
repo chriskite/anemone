@@ -31,7 +31,6 @@ module Anemone
       self.new(root) do |core|
         block.call(core) if block
         core.run
-        core.do_after_crawl_blocks
         return core
       end
     end
@@ -136,8 +135,12 @@ module Anemone
 
       @tentacles.each { |t| t.join }
 
+      do_after_crawl_blocks()
+      
       self
     end
+    
+    private    
     
     #
     # Execute the after_crawl blocks
