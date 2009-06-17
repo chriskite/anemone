@@ -75,7 +75,7 @@ Anemone.crawl(root, {:discard_page_bodies => true}) do |anemone|
           puts "  linked from #{u}"
         end
         
-        puts " ..." if missing_links.size > 10
+        puts " ..." if links.size > 10
       end
 
       print "\n"
