@@ -14,6 +14,7 @@ module Anemone
     def initialize(url, &block)
       url = URI(url) if url.is_a?(String)
       @url = url
+      @url.path = "/" if @url.path.empty?
       @tentacles = []
       @pages = PageHash.new
       @on_every_page_blocks = []
