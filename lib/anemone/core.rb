@@ -81,6 +81,15 @@ module Anemone
     end
     
     #
+    # Specify a block which will select which links to follow on each page.
+    # The block should return an Array of URI objects.
+    #
+    def focus_crawl(&block)
+      @focus_crawl_block = block
+      self
+    end
+    
+    #
     # Perform the crawl
     #
     def run
@@ -95,24 +104,25 @@ module Anemone
       
       link_queue.enq(@url)
 
-      while true do
+      loop do
         page = page_queue.deq
         
         @pages[page.url] = page
         
         puts "#{page.url} Queue: #{link_queue.size}" if Anemone.options.verbose
         
+        #perform the on_every_page blocks for this page
         do_page_blocks(page)
 
         page.doc = nil if Anemone.options.discard_page_bodies
         
-        page.links.each do |link| 
-          if visit_link?(link)
-            link_queue.enq(link)
-            @pages[link] = nil
-          end
+        links_to_follow(page).each do |link|
+          link_queue.enq(link)
+          @pages[link] = nil
         end
         
+        #create an entry in the page hash for each alias of this page,
+        #i.e. all the pages that redirected to this page
         page.aliases.each do |aka|
           if !@pages.has_key?(aka) or @pages[aka].nil?
             @pages[aka] = page.alias_clone(aka)
@@ -164,6 +174,16 @@ module Anemone
         end
       end
     end      
+    
+    #
+    # Return an Array of links to follow from the given page.
+    # Based on whether or not the link has already been crawled,
+    # and the block given to focus_crawl()
+    #
+    def links_to_follow(page)
+      links = @focus_crawl_block ? @focus_crawl_block.call(page) : page.links
+      links.find_all { |link| visit_link?(link) }
+    end
     
     #
     # Returns +true+ if *link* has not been visited already,
