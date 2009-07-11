@@ -9,12 +9,12 @@ module Anemone
     attr_reader :url
     # Array of distinct A tag HREFs from the page
     attr_reader :links
-    #Content-type of the  HTTP response
-    attr_reader :content_type
+    # Headers of the HTTP response
+    attr_reader :headers
     
-    #OpenStruct for user-stored data
+    # OpenStruct for user-stored data
     attr_accessor :data
-    #Nokogiri document for the HTML body
+    # Nokogiri document for the HTML body
     attr_accessor :doc
     # Integer response code of the page
     attr_accessor :code	
@@ -39,7 +39,7 @@ module Anemone
           aka = location
         end
 
-        return Page.new(url, response.body, code, response['Content-Type'], aka)
+        return Page.new(url, response.body, code, response.to_hash, aka)
       rescue
         return Page.new(url)
       end
@@ -48,10 +48,10 @@ module Anemone
     #
     # Create a new page
     #
-    def initialize(url, body = nil, code = nil, content_type = nil, aka = nil)
+    def initialize(url, body = nil, code = nil, headers = nil, aka = nil)
       @url = url
       @code = code
-      @content_type = content_type
+      @headers = headers
       @links = []
       @aliases = []
       @data = OpenStruct.new
@@ -117,6 +117,13 @@ module Anemone
       @links.inject([]) do |results, link|
         results.concat([link].concat(page_hash[link].aliases))
       end
+    end
+    
+    #
+    # The content-type returned by the HTTP request for this page
+    #
+    def content_type
+      @headers['content-type'][0] rescue nil
     end
     
     #
