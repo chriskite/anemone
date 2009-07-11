@@ -9,12 +9,13 @@ module Anemone
     attr_reader :pages
     
     #
-    # Initialize the crawl with a starting *url*, *options*, and optional *block*
+    # Initialize the crawl with starting *urls* (single URL or Array of URLs)
+    # and optional *block*
     #
-    def initialize(url, &block)
-      url = URI(url) if url.is_a?(String)
-      @url = url
-      @url.path = "/" if @url.path.empty?
+    def initialize(urls, &block)
+      @urls = [urls].flatten.map{ |url| URI(url) if url.is_a?(String) }
+      @urls.each{ |url| url.path = '/' if url.path.empty? }
+      
       @tentacles = []
       @pages = PageHash.new
       @on_every_page_blocks = []
@@ -93,6 +94,9 @@ module Anemone
     # Perform the crawl
     #
     def run
+      @urls.delete_if { |url| !visit_link?(url) }
+      return if @urls.empty?
+      
       link_queue = Queue.new
       page_queue = Queue.new
 
@@ -100,9 +104,7 @@ module Anemone
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue).run }
       end
       
-      return if !visit_link?(@url)
-      
-      link_queue.enq(@url)
+      @urls.each{ |url| link_queue.enq(url) }
 
       loop do
         page = page_queue.deq

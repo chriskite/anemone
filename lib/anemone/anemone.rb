@@ -20,7 +20,7 @@ module Anemone
   #
   # Convenience method to start a crawl using Core
   #
-  def Anemone.crawl(url, options = {}, &block)
+  def Anemone.crawl(urls, options = {}, &block)
     Anemone.options = OpenStruct.new(options)
 	
     #by default, run 4 Tentacle threads to fetch pages
@@ -32,6 +32,6 @@ module Anemone
     #by default, don't throw away the page response body after scanning it for links
     Anemone.options.discard_page_bodies ||= false
 	
-    Core.crawl(url, &block)
+    Core.crawl(urls, &block)
   end
 end
