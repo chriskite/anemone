@@ -3,7 +3,7 @@ require 'anemone/core'
 
 module Anemone
   # Version number
-  VERSION = '0.1.0'
+  VERSION = '0.1.1'
   
   # User-Agent string used for HTTP requests
   USER_AGENT = "Anemone/#{self::VERSION}"
