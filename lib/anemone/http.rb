@@ -29,8 +29,9 @@ module Anemone
     # Get an HTTPResponse for *url*, sending the appropriate User-Agent string
     #
     def self.get_response(url)
+      full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
       Net::HTTP.start(url.host, url.port) do |http|
-        return http.get(url.path, {'User-Agent' => Anemone::USER_AGENT })
+        return http.get(full_path, {'User-Agent' => Anemone::USER_AGENT })
       end
     end
   end
