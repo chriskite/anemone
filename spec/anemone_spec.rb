@@ -8,7 +8,7 @@ describe Anemone do
   end
 
   it "should have options" do
-    Anemone.respond_to?('options').should == true
+    Anemone.should respond_to(:options)
   end
   
   it "should accept options for the crawl" do
