@@ -59,5 +59,56 @@ module Anemone
       core.pages.keys.map{|k| k.to_s}.should_not include(pages[2].url)
     end
     
+    it "should be able to skip links based on a RegEx" do
+      pages = []
+      pages << FakePage.new('0', :links => ['1', '2'])
+      pages << FakePage.new('1')
+      pages << FakePage.new('2')
+      
+      core = Anemone.crawl(pages[0].url) do |a|
+        a.skip_links_like /1/
+      end
+      
+      core.should have(2).pages
+      core.pages.keys.map{|k| k.to_s}.should_not include(pages[1].url)
+    end
+    
+    it "should be able to call a block on every page" do
+      pages = []
+      pages << FakePage.new('0', :links => ['1', '2'])
+      pages << FakePage.new('1')
+      pages << FakePage.new('2')
+      
+      count = 0
+      Anemone.crawl(pages[0].url) do |a|
+        a.on_every_page { count += 1 }
+      end     
+      
+      count.should == 3
+    end
+    
+    it "should not discard page bodies by default" do
+      Anemone.crawl(FakePage.new('0').url).pages.values.first.doc.should_not be_nil
+    end
+    
+    it "should optionally discard page bodies to conserve memory" do
+      core = Anemone.crawl(FakePage.new('0').url, :discard_page_bodies => true)
+      core.pages.values.first.doc.should be_nil
+    end
+    
+    it "should provide a focus_crawl method to select the links on each page to follow" do
+      pages = []
+      pages << FakePage.new('0', :links => ['1', '2'])
+      pages << FakePage.new('1')
+      pages << FakePage.new('2')
+
+      core = Anemone.crawl(pages[0].url) do |a|
+        a.focus_crawl {|p| p.links.reject{|l| l.to_s =~ /1/}}
+      end     
+      
+      core.should have(2).pages
+      core.pages.keys.map{|k| k.to_s}.should_not include(pages[1].url)
+    end
+    
   end
 end
