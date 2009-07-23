@@ -12,8 +12,8 @@ describe Anemone do
   end
   
   it "should accept options for the crawl" do
-    Anemone.crawl(SPEC_DOMAIN, :verbose => true, :threads => 2, :discard_page_bodies => true)
-    Anemone.options.verbose.should == true
+    Anemone.crawl(SPEC_DOMAIN, :verbose => false, :threads => 2, :discard_page_bodies => true)
+    Anemone.options.verbose.should == false
     Anemone.options.threads.should == 2
     Anemone.options.discard_page_bodies.should == true
   end
