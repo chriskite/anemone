@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s| 
   s.name = "anemone"
-  s.version = "0.1.1"
+  s.version = "0.1.2"
   s.author = "Chris Kite"
   s.homepage = "http://anemone.rubyforge.org"
   s.rubyforge_project = "anemone"
@@ -33,6 +33,7 @@ spec = Gem::Specification.new do |s|
   s.test_files = %w[
     spec/anemone_spec.rb
     spec/core_spec.rb
+    spec/page_spec.rb
     spec/fakeweb_helper.rb
     spec/spec_helper.rb
   ]
