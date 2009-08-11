@@ -4,10 +4,7 @@ require 'anemone/core'
 module Anemone
   # Version number
   VERSION = '0.1.1'
-  
-  # User-Agent string used for HTTP requests
-  USER_AGENT = "Anemone/#{self::VERSION}"
-  
+
   #module-wide options
   def Anemone.options=(options)
     @options = options
@@ -31,7 +28,18 @@ module Anemone
 	
     #by default, don't throw away the page response body after scanning it for links
     Anemone.options.discard_page_bodies ||= false
-	
+
+    #by default, identify self as Anemone/VERSION
+    Anemone.options.user_agent ||= "Anemone/#{self::VERSION}"   
+
+    #no delay between requests by default
+    Anemone.options.delay ||= 0
+    
+    #use a single thread if a delay was requested
+    if(Anemone.options.delay != 0)
+      Anemone.options.threads = 1
+    end
+    
     Core.crawl(urls, &block)
   end
 end

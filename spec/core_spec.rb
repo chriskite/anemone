@@ -110,5 +110,19 @@ module Anemone
       core.pages.keys.map{|k| k.to_s}.should_not include(pages[1].url)
     end
     
+    it "should optionally delay between page requests" do
+      delay = 0.25
+      
+      pages = []
+      pages << FakePage.new('0', :links => '1')
+      pages << FakePage.new('1')
+      
+      start = Time.now
+      Anemone.crawl(pages[0].url, :delay => delay)
+      finish = Time.now
+      
+      (finish - start).should satisfy {|t| t > delay * 2}
+    end
+    
   end
 end

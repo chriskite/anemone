@@ -24,6 +24,8 @@ module Anemone
         page = Page.fetch(link)
         
         @page_queue.enq(page)
+
+        sleep Anemone.options.delay
       end
     end
     
