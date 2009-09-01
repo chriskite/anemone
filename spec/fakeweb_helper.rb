@@ -13,14 +13,17 @@ module Anemone
   class FakePage
     attr_accessor :links
     attr_accessor :hrefs
+    attr_accessor :body
     
     def initialize(name = '', options = {})
       @name = name
       @links = [options[:links]].flatten if options.has_key?(:links)
       @hrefs = [options[:hrefs]].flatten if options.has_key?(:hrefs)
       @redirect = options[:redirect] if options.has_key?(:redirect)
+      @content_type = options[:content_type] || "text/html"
+      @body = options[:body]
       
-      create_body
+      create_body unless @body
       add_to_fakeweb
     end
     
@@ -38,7 +41,7 @@ module Anemone
     end
     
     def add_to_fakeweb
-      options = {:body => @body, :content_type => "text/html", :status => [200, "OK"]}
+      options = {:body => @body, :content_type => @content_type, :status => [200, "OK"]}
       
       if @redirect
         options[:status] = [301, "Permanently Moved"] 

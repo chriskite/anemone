@@ -124,5 +124,20 @@ module Anemone
       (finish - start).should satisfy {|t| t > delay * 2}
     end
     
+    it "should optionally obey the robots exclusion protocol" do
+      pages = []
+      pages << FakePage.new('0', :links => '1')
+      pages << FakePage.new('1')
+      pages << FakePage.new('robots.txt', 
+                            :body => "User-agent: *\nDisallow: /1",
+                            :content_type => 'text/plain')
+
+      core = Anemone.crawl(pages[0].url, :obey_robots_txt => true)
+      urls = core.pages.keys.map{|k| k.to_s}
+      
+      urls.should include(pages[0].url)
+      urls.should_not include(pages[1].url)
+    end    
+    
   end
 end

@@ -34,7 +34,19 @@ module Anemone
 
     #no delay between requests by default
     Anemone.options.delay ||= 0
-    
+
+    #optionally obey the robots exclusion protocol
+    if Anemone.options.obey_robots_txt ||= false
+      begin
+        require 'robots'
+      rescue LoadError
+        warn "To support the robot exclusion protocol, install the robots gem:\n" \
+          "sudo gem sources -a http://gems.github.com\n" \
+          "sudo gem install fizx-robots"
+        exit
+      end
+    end
+
     #use a single thread if a delay was requested
     if(Anemone.options.delay != 0)
       Anemone.options.threads = 1

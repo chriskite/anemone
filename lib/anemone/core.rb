@@ -23,6 +23,10 @@ module Anemone
       @skip_link_patterns = []
       @after_crawl_blocks = []
       
+      if Anemone.options.obey_robots_txt
+        @robots = Robots.new(Anemone.options.user_agent)
+      end
+      
       block.call(self) if block
     end
     
@@ -189,11 +193,13 @@ module Anemone
     
     #
     # Returns +true+ if *link* has not been visited already,
-    # and is not excluded by a skip_link pattern. Returns
-    # +false+ otherwise.
+    # and is not excluded by a skip_link pattern...
+    # and is not excluded by robots.txt
+    # Returns +false+ otherwise.
     #
     def visit_link?(link)
-      !@pages.has_key?(link) and !skip_link?(link)
+      allowed = Anemone.options.obey_robots_txt ? @robots.allowed?(link) : true
+      !@pages.has_key?(link) and !skip_link?(link) and allowed
     end
     
     #
