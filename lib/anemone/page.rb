@@ -22,7 +22,8 @@ module Anemone
     attr_accessor :aliases
     # Boolean indicating whether or not this page has been visited in PageHash#shortest_paths!
     attr_accessor :visited
-    # Used by PageHash#shortest_paths! to store depth of the page
+    # Depth of this page from the root of the crawl. This is not necessarily the
+    # shortest path; use PageHash#shortest_paths! to find that value.
     attr_accessor :depth
     # URL of the page that brought us to this page
     attr_accessor :referer
