@@ -11,6 +11,10 @@ module Anemone
       super(index.to_s, other)
     end
     
+    def has_key?(key)
+      super(key.to_s)
+    end
+    
     #
     # Use a breadth-first search to calculate the single-source
     # shortest paths from *root* to all pages in the PageHash
