@@ -3,7 +3,7 @@ require 'anemone/core'
 
 module Anemone
   # Version number
-  VERSION = '0.1.2'
+  VERSION = '0.2.0'
 
   #module-wide options
   def Anemone.options=(options)
