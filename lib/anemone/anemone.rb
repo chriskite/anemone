@@ -20,22 +20,22 @@ module Anemone
   def Anemone.crawl(urls, options = {}, &block)
     Anemone.options = OpenStruct.new(options)
 	
-    #by default, run 4 Tentacle threads to fetch pages
+    # by default, run 4 Tentacle threads to fetch pages
     Anemone.options.threads ||= 4
 	
-    #disable verbose output by default
+    # disable verbose output by default
     Anemone.options.verbose ||= false
 	
-    #by default, don't throw away the page response body after scanning it for links
+    # by default, don't throw away the page response body after scanning it for links
     Anemone.options.discard_page_bodies ||= false
 
-    #by default, identify self as Anemone/VERSION
+    # by default, identify self as Anemone/VERSION
     Anemone.options.user_agent ||= "Anemone/#{self::VERSION}"   
 
-    #no delay between requests by default
+    # no delay between requests by default
     Anemone.options.delay ||= 0
 
-    #optionally obey the robots exclusion protocol
+    # by default, don't obey the robots exclusion protocol
     if Anemone.options.obey_robots_txt ||= false
       begin
         require 'robots'
@@ -46,6 +46,9 @@ module Anemone
         exit
       end
     end
+    
+    # by default, don't limit the depth of the crawl
+    Anemone.options.depth_limit ||= :infinity
 
     #use a single thread if a delay was requested
     if(Anemone.options.delay != 0)

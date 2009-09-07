@@ -161,5 +161,21 @@ module Anemone
       core.pages[pages[0].url].referer.should == nil
     end
     
+    it "should optionally limit the depth of the crawl" do
+      num_pages = 5
+      
+      pages = []
+      
+      num_pages.times do |n|
+        # register this page with a link to the next page
+        link = (n + 1).to_s if n + 1 < num_pages
+        pages << FakePage.new(n.to_s, :links => [link].compact)
+      end
+
+      core = Anemone.crawl(pages[0].url, :depth_limit => 3) 
+
+      core.should have(4).pages  
+    end
+
   end
 end

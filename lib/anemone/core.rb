@@ -117,7 +117,7 @@ module Anemone
         
         puts "#{page.url} Queue: #{link_queue.size}" if Anemone.options.verbose
         
-        #perform the on_every_page blocks for this page
+        # perform the on_every_page blocks for this page
         do_page_blocks(page)
 
         page.doc = nil if Anemone.options.discard_page_bodies
@@ -127,8 +127,8 @@ module Anemone
           @pages[link] = nil
         end
         
-        #create an entry in the page hash for each alias of this page,
-        #i.e. all the pages that redirected to this page
+        # create an entry in the page hash for each alias of this page,
+        # i.e. all the pages that redirected to this page
         page.aliases.each do |aka|
           if !@pages.has_key?(aka) or @pages[aka].nil?
             @pages[aka] = page.alias_clone(aka)
@@ -188,18 +188,26 @@ module Anemone
     #
     def links_to_follow(page)
       links = @focus_crawl_block ? @focus_crawl_block.call(page) : page.links
-      links.find_all { |link| visit_link?(link) }
+      links.select { |link| visit_link?(link, page) }
     end
     
     #
     # Returns +true+ if *link* has not been visited already,
     # and is not excluded by a skip_link pattern...
-    # and is not excluded by robots.txt
+    # and is not excluded by robots.txt...
+    # and is not deeper than the depth limit
     # Returns +false+ otherwise.
     #
-    def visit_link?(link)
+    def visit_link?(link, from_page = nil)
       allowed = Anemone.options.obey_robots_txt ? @robots.allowed?(link) : true
-      !@pages.has_key?(link) and !skip_link?(link) and allowed
+      
+      if from_page
+        too_deep = from_page.depth >= Anemone.options.depth_limit rescue false
+      else
+        too_deep = false
+      end
+      
+      !@pages.has_key?(link) and !skip_link?(link) and allowed and !too_deep
     end
     
     #

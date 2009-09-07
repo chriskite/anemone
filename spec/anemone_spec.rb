@@ -15,13 +15,15 @@ describe Anemone do
                                :threads => 2, 
                                :discard_page_bodies => true,
                                :user_agent => 'test',
-                               :obey_robots_txt => true)
+                               :obey_robots_txt => true,
+                               :depth_limit => 3)
     Anemone.options.verbose.should == false
     Anemone.options.threads.should == 2
     Anemone.options.discard_page_bodies.should == true
     Anemone.options.delay.should == 0
     Anemone.options.user_agent.should == 'test'
     Anemone.options.obey_robots_txt.should == true
+    Anemone.options.depth_limit.should == 3
   end
   
   it "should use 1 thread if a delay is requested" do
