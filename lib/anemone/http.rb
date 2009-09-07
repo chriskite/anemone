@@ -10,7 +10,7 @@ module Anemone
     # Returns the response object, response code, and final URI location.
     # 
     def self.get(url, referer = nil)      
-      response = get_response(url)
+      response = get_response(url, referer)
       code = Integer(response.code)
       loc = url
       

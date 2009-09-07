@@ -38,7 +38,7 @@ module Anemone
           referer = from_page.url
           depth = from_page.depth + 1
         end
-        
+
         response, code, location = Anemone::HTTP.get(url, referer)
 
         aka = nil
