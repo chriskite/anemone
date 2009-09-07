@@ -25,7 +25,7 @@ module Anemone
       core = Anemone.crawl(pages[0].url)
       
       core.should have(2).pages
-      core.pages.keys.map{|k| k.to_s}.should_not include('http://www.other.com/')
+      core.pages.keys.should_not include('http://www.other.com/')
     end
     
     it "should follow http redirects" do
@@ -56,7 +56,7 @@ module Anemone
       core = Anemone.crawl(pages[0].url)
       
       core.should have(2).pages
-      core.pages.keys.map{|k| k.to_s}.should_not include(pages[2].url)
+      core.pages.keys.should_not include(pages[2].url)
     end
     
     it "should be able to skip links based on a RegEx" do
@@ -70,7 +70,7 @@ module Anemone
       end
       
       core.should have(2).pages
-      core.pages.keys.map{|k| k.to_s}.should_not include(pages[1].url)
+      core.pages.keys.should_not include(pages[1].url)
     end
     
     it "should be able to call a block on every page" do
@@ -107,7 +107,7 @@ module Anemone
       end     
       
       core.should have(2).pages
-      core.pages.keys.map{|k| k.to_s}.should_not include(pages[1].url)
+      core.pages.keys.should_not include(pages[1].url)
     end
     
     it "should optionally delay between page requests" do
@@ -123,7 +123,7 @@ module Anemone
       
       (finish - start).should satisfy {|t| t > delay * 2}
     end
-    
+     
     it "should optionally obey the robots exclusion protocol" do
       pages = []
       pages << FakePage.new('0', :links => '1')
@@ -133,11 +133,33 @@ module Anemone
                             :content_type => 'text/plain')
 
       core = Anemone.crawl(pages[0].url, :obey_robots_txt => true)
-      urls = core.pages.keys.map{|k| k.to_s}
+      urls = core.pages.keys
       
       urls.should include(pages[0].url)
       urls.should_not include(pages[1].url)
-    end    
+    end
+    
+    it "should track the page depth and referer" do
+      num_pages = 5
+      
+      pages = []
+      
+      num_pages.times do |n|
+        # register this page with a link to the next page
+        link = (n + 1).to_s if n + 1 < num_pages
+        pages << FakePage.new(n.to_s, :links => [link].compact)
+      end
+
+      core = Anemone.crawl(pages[0].url) 
+
+      num_pages.times do |n| 
+        page = core.pages[pages[n].url]
+        page.depth.should == n
+        page.referer.should == core.pages[pages[n-1].url].url if n > 0
+      end
+      
+      core.pages[pages[0].url].referer.should == nil
+    end
     
   end
 end

@@ -9,7 +9,7 @@ module Anemone
     # Retrieve an HTTP response for *url*, following redirects.
     # Returns the response object, response code, and final URI location.
     # 
-    def self.get(url)      
+    def self.get(url, referer = nil)      
       response = get_response(url)
       code = Integer(response.code)
       loc = url
@@ -18,7 +18,7 @@ module Anemone
       while response.is_a?(Net::HTTPRedirection) and limit > 0
           loc = URI(response['location'])
           loc = url.merge(loc) if loc.relative?
-          response = get_response(loc)
+          response = get_response(loc, referer)
           limit -= 1
       end
 
@@ -28,10 +28,16 @@ module Anemone
     #
     # Get an HTTPResponse for *url*, sending the appropriate User-Agent string
     #
-    def self.get_response(url)
+    def self.get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
+      user_agent = Anemone.options.user_agent rescue nil
+      
+      opts = {}
+      opts['User-Agent'] = user_agent if user_agent
+      opts['Referer'] = referer.to_s if referer
+
       Net::HTTP.start(url.host, url.port) do |http|
-        return http.get(full_path, {'User-Agent' => Anemone.options.user_agent })
+        return http.get(full_path, opts)
       end
     end
   end

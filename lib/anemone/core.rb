@@ -123,7 +123,7 @@ module Anemone
         page.doc = nil if Anemone.options.discard_page_bodies
         
         links_to_follow(page).each do |link|
-          link_queue.enq(link)
+          link_queue.enq([link, page])
           @pages[link] = nil
         end
         

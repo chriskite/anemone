@@ -24,22 +24,29 @@ module Anemone
     attr_accessor :visited
     # Used by PageHash#shortest_paths! to store depth of the page
     attr_accessor :depth
+    # URL of the page that brought us to this page
+    attr_accessor :referer
     
     #
     # Create a new Page from the response of an HTTP request to *url*
     #
-    def self.fetch(url)
+    def self.fetch(url, from_page = nil)
       begin
-        url = URI(url) if url.is_a?(String)
+        url = URI(url) unless url.is_a?(URI)
 
-        response, code, location = Anemone::HTTP.get(url)
+        if from_page
+          referer = from_page.url
+          depth = from_page.depth + 1
+        end
+        
+        response, code, location = Anemone::HTTP.get(url, referer)
 
         aka = nil
         if !url.eql?(location)
           aka = location
         end
 
-        return Page.new(url, response.body, code, response.to_hash, aka)
+        return Page.new(url, response.body, code, response.to_hash, aka, referer, depth)
       rescue
         return Page.new(url)
       end
@@ -48,14 +55,16 @@ module Anemone
     #
     # Create a new page
     #
-    def initialize(url, body = nil, code = nil, headers = nil, aka = nil)
+    def initialize(url, body = nil, code = nil, headers = nil, aka = nil, referer = nil, depth = 0)
       @url = url
       @code = code
       @headers = headers
       @links = []
       @aliases = []
       @data = OpenStruct.new
-	  
+      @referer = referer
+      @depth = depth || 0
+
       @aliases << aka if !aka.nil?
 
       if body

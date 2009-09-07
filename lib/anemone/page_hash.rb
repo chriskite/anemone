@@ -1,6 +1,16 @@
 module Anemone
   class PageHash < Hash
     
+    # We typically index the hash with a URI,
+    # but convert it to a String for easier retrieval
+    def [](index)
+      super(index.to_s)
+    end
+    
+    def []=(index, other)
+      super(index.to_s, other)
+    end
+    
     #
     # Use a breadth-first search to calculate the single-source
     # shortest paths from *root* to all pages in the PageHash
