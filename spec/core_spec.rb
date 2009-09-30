@@ -139,43 +139,39 @@ module Anemone
       urls.should_not include(pages[1].url)
     end
     
-    it "should track the page depth and referer" do
-      num_pages = 5
-      
-      pages = []
-      
-      num_pages.times do |n|
-        # register this page with a link to the next page
-        link = (n + 1).to_s if n + 1 < num_pages
-        pages << FakePage.new(n.to_s, :links => [link].compact)
+    describe "many pages" do
+      before(:each) do
+        @pages, size = [], 5
+        
+        size.times do |n|
+          # register this page with a link to the next page
+          link = (n + 1).to_s if n + 1 < size
+          @pages << FakePage.new(n.to_s, :links => Array(link))
+        end    
       end
-
-      core = Anemone.crawl(pages[0].url) 
-
-      num_pages.times do |n| 
-        page = core.pages[pages[n].url]
-        page.depth.should == n
-        page.referer.should == core.pages[pages[n-1].url].url if n > 0
-      end
-      
-      core.pages[pages[0].url].referer.should == nil
-    end
     
-    it "should optionally limit the depth of the crawl" do
-      num_pages = 5
-      
-      pages = []
-      
-      num_pages.times do |n|
-        # register this page with a link to the next page
-        link = (n + 1).to_s if n + 1 < num_pages
-        pages << FakePage.new(n.to_s, :links => [link].compact)
+      it "should track the page depth and referer" do
+        core = Anemone.crawl(@pages[0].url) 
+        previous_page = nil
+        
+        @pages.each_with_index do |page, i|
+          page = core.pages[page.url]
+          page.should be
+          page.depth.should == i
+          
+          if previous_page
+            page.referer.should == previous_page.url
+          else
+            page.referer.should be_nil
+          end
+          previous_page = page
+        end
       end
-
-      core = Anemone.crawl(pages[0].url, :depth_limit => 3) 
-
-      core.should have(4).pages  
+    
+      it "should optionally limit the depth of the crawl" do
+        core = Anemone.crawl(@pages[0].url, :depth_limit => 3) 
+        core.should have(4).pages
+      end
     end
-
   end
 end
