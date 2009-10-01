@@ -13,10 +13,10 @@ module Anemone
     # Initialize the crawl with starting *urls* (single URL or Array of URLs)
     # and optional *block*
     #
-    def initialize(urls, &block)
+    def initialize(urls)
       @urls = [urls].flatten.map{ |url| URI(url) if url.is_a?(String) }
       @urls.each{ |url| url.path = '/' if url.path.empty? }
-      
+
       @tentacles = []
       @pages = PageHash.new
       @on_every_page_blocks = []
@@ -27,18 +27,17 @@ module Anemone
       if Anemone.options.obey_robots_txt
         @robots = Robots.new(Anemone.options.user_agent)
       end
-      
-      block.call(self) if block
+
+      yield self if block_given?
     end
     
     #
     # Convenience method to start a new crawl
     #
-    def self.crawl(root, &block)
+    def self.crawl(root)
       self.new(root) do |core|
-        block.call(core) if block
+        yield core if block_given?
         core.run
-        return core
       end
     end
     
