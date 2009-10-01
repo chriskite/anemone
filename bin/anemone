@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby -wKU
+require 'anemone/cli'
+
+Anemone::CLI::run

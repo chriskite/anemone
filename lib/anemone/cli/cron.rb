@@ -1,44 +1,30 @@
-#! /usr/bin/env ruby
-# == Synopsis
-#   Performs pagedepth, url list, and count functionality
-#   Meant to be run daily as a cron job
-#
-# == Usage
-#   anemone_url_list.rb [options] url
-#
-# == Options
-#   -r, --relative                  Output relative URLs (rather than absolute)
-#   -o, --output filename           Filename to save URL list to. Defaults to urls.txt.
-#
-# == Author
-#   Chris Kite
-
-$:.unshift File.join(File.dirname(__FILE__), "..", "lib")
-
 require 'anemone'
 require 'optparse'
 require 'ostruct'
-
-def usage
-  puts <<END
-Usage: anemone_url_list.rb [options] url
-
-Options:
-  -r, --relative           Output relative URLs (rather than absolute)
-  -o, --output filename    Filename to save URL list to. Defautls to urls.txt.
-END
-end
 
 options = OpenStruct.new
 options.relative = false
 options.output_file = 'urls.txt'
 
-# make sure that the last option is a URL we can crawl
 begin
-  URI(ARGV.last)
+  # make sure that the last argument is a URL we can crawl
+  root = URI(ARGV.last)
 rescue
-  usage
-  Process.exit 
+  puts <<-INFO
+Usage:
+  anemone cron [options] <url>
+
+Synopsis:
+  Combination of `count`, `pagedepth` and `url-list` commands.
+  Performs pagedepth, url list, and count functionality.
+  Outputs results to STDOUT and link list to file (urls.txt).
+  Meant to be run daily as a cron job.
+
+Options:
+  -r, --relative           Output relative URLs (rather than absolute)
+  -o, --output filename    Filename to save URL list to. Defautls to urls.txt.
+INFO
+  exit(0)
 end
 
 # parse command-line options
@@ -46,8 +32,6 @@ opts = OptionParser.new
 opts.on('-r', '--relative')        { options.relative = true }
 opts.on('-o', '--output filename') {|o| options.output_file = o }
 opts.parse!(ARGV)
-
-root = ARGV.last
 
 Anemone.crawl(root, {:discard_page_bodies => true}) do |anemone|  
   
@@ -101,6 +85,6 @@ Anemone.crawl(root, {:discard_page_bodies => true}) do |anemone|
       url = options.relative ? url.path.to_s : url.to_s
       file.puts url
     end
-    
   end
+  
 end
