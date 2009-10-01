@@ -6,15 +6,11 @@ module Anemone
 
     # The URL of the page
     attr_reader :url
-    # Array of distinct A tag HREFs from the page
-    attr_reader :links
     # Headers of the HTTP response
     attr_reader :headers
     
     # OpenStruct for user-stored data
     attr_accessor :data
-    # Nokogiri document for the HTML body
-    attr_accessor :doc
     # Integer response code of the page
     attr_accessor :code	
     # Array of redirect-aliases for the page
@@ -36,42 +32,46 @@ module Anemone
       @url = url
       @code = code
       @headers = headers
-      @links = []
-      @aliases = []
+      @headers['content-type'] ||= ['']
+      @aliases = Array(aka)
       @data = OpenStruct.new
       @referer = referer
       @depth = depth || 0
-      @response_time = response_time      
-
-      @aliases << aka unless aka.nil?
-
-      if body
-        begin
-          @doc = Nokogiri::HTML(body)
-        rescue
-          return
-        end
-
-        return if @doc.nil?
-
-        #get a list of distinct links on the page, in absolute url form
-        @doc.css('a').each do |a| 
-          u = a.attributes['href'].content if a.attributes['href']
-          next if u.nil?
-          
-          begin
-            abs = to_absolute(URI(u))
-          rescue
-            next
+      @response_time = response_time
+      @body = body
+    end
+    
+    # Nokogiri document for the HTML body
+    def doc
+      @doc ||= @body && html? && Nokogiri::HTML(@body)
+    end
+    
+    # Array of distinct A tag HREFs from the page
+    def links
+      @links ||= begin
+        if doc
+          # get a list of distinct links on the page, in absolute url form
+          links = doc.css('a[href]').inject([]) do |list, link|
+            href = link.attributes['href'].content
+            unless href.nil? or href.empty?
+              url = to_absolute(href)
+              list << url if in_domain?(url)
+            end
+            list
           end
-
-          @links << abs if in_domain?(abs)
+          
+          links.uniq!
+          links
+        else
+          []
         end
-        
-        @links.uniq!
       end
     end
     
+    def discard_document!
+      links # force parsing of page links before we trash the document
+      @body = @doc = nil
+    end
     
     #
     # Return a new page with the same *response* and *url*, but
@@ -101,7 +101,7 @@ module Anemone
     # *page_hash* is a PageHash object with the results of the current crawl.
     #
     def links_and_their_aliases(page_hash)
-      @links.inject([]) do |results, link|
+      links.inject([]) do |results, link|
         results.concat([link].concat(page_hash[link].aliases))
       end
     end
@@ -110,7 +110,7 @@ module Anemone
     # The content-type returned by the HTTP request for this page
     #
     def content_type
-      @headers['content-type'][0] rescue nil
+      headers['content-type'].first
     end
     
     #
@@ -118,7 +118,7 @@ module Anemone
     # otherwise.
     #
     def html?
-      (@content_type =~ /text\/html/) == 0
+      !!(content_type =~ %r{^(text/html|application/xhtml+xml)\b})
     end
     
     #
@@ -143,14 +143,11 @@ module Anemone
     #
     def to_absolute(link)
       # remove anchor
-      link = URI.encode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,''))
-
-      relative = URI(link)
-      absolute = @url.merge(relative)
-
-      absolute.path = '/' if absolute.path.empty?
-
-      return absolute
+      link = link.split('#').first if link.index('#')
+      url = URI(URI.encode(link))
+      url = @url.merge(url) if url.relative?
+      url.path = '/' if url.path.empty?
+      url
     end
     
     #

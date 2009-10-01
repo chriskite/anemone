@@ -121,7 +121,7 @@ module Anemone
         # perform the on_every_page blocks for this page
         do_page_blocks(page)
 
-        page.doc = nil if Anemone.options.discard_page_bodies
+        page.discard_document! if Anemone.options.discard_page_bodies
         
         links_to_follow(page).each do |link|
           link_queue.enq([link, page])
