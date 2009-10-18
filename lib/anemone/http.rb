@@ -1,4 +1,4 @@
-require 'net/http'
+require 'net/https'
 
 module Anemone
   class HTTP < Net::HTTP
@@ -36,7 +36,14 @@ module Anemone
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
 
-      Net::HTTP.start(url.host, url.port) do |http|
+      http = Net::HTTP.new(url.host, url.port)
+
+      if url.scheme == 'https'
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
+
+      http.start do |http|
         return http.get(full_path, opts)
       end
     end
