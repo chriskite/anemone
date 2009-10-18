@@ -1,6 +1,7 @@
 require 'net/http'
 require 'thread'
 require 'anemone/tentacle'
+require 'anemone/page'
 require 'anemone/page_hash'
 
 module Anemone

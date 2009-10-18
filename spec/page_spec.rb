@@ -2,14 +2,13 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 module Anemone
   describe Page do
-    
-    before(:each) do
-      @page = Page.fetch(FakePage.new('home').url)
+
+    before(:all) do
+      @http = Anemone::HTTP.new
     end
-    
-    it "should be able to fetch a page" do
-      @page.should_not be_nil
-      @page.url.to_s.should include('home')
+
+    before(:each) do
+      @page = @http.fetch_page(FakePage.new('home').url)
     end
     
     it "should store the response headers when fetching a page" do
@@ -35,7 +34,7 @@ module Anemone
       
       @page.redirect?.should == false
       
-      Page.fetch(FakePage.new('redir', :redirect => 'home').url).redirect?.should == true
+      @http.fetch_page(FakePage.new('redir', :redirect => 'home').url).redirect?.should == true
     end
     
     it "should have a method to tell if a URI is in the same domain as the page" do
@@ -43,6 +42,10 @@ module Anemone
       
       @page.in_domain?(URI(FakePage.new('test').url)).should == true
       @page.in_domain?(URI('http://www.other.com/')).should == false
+    end
+
+    it "should include the response time for the HTTP request" do
+      @page.should respond_to(:response_time)
     end
     
   end
