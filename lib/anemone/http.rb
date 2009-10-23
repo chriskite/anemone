@@ -29,7 +29,7 @@ module Anemone
           aka = location
         end
 
-        return Page.new(url, response.body, code, response.to_hash, aka, referer, depth, response_time)
+        return Page.new(url, response.body.dup, code, response.to_hash, aka, referer, depth, response_time)
       rescue
         return Page.new(url)
       end
