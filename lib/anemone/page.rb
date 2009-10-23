@@ -143,11 +143,14 @@ module Anemone
     #
     def to_absolute(link)
       # remove anchor
-      link = link.split('#').first if link.index('#')
-      url = URI(URI.encode(link))
-      url = @url.merge(url) if url.relative?
-      url.path = '/' if url.path.empty?
-      url
+      link = URI.encode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,''))
+
+      relative = URI(link)
+      absolute = @url.merge(relative)
+
+      absolute.path = '/' if absolute.path.empty?
+
+      return absolute
     end
     
     #
