@@ -21,14 +21,8 @@ module Anemone
         link, from_page = @link_queue.deq
         
         break if link == :END
-        
-        if from_page
-          page = @http.fetch_page(link, from_page)
-        else
-          page = @http.fetch_page(link)
-        end
-        
-        @page_queue.enq(page)
+
+        @page_queue.enq @http.fetch_page(link, from_page)
 
         sleep Anemone.options.delay
       end
