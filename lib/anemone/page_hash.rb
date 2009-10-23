@@ -14,6 +14,18 @@ module Anemone
     def has_key?(key)
       super(key.to_s)
     end
+
+    # Does this PageHash contain the specified URL?
+    # HTTP and HTTPS versions of a URL are considered to be the same page.
+    def has_page?(url)
+      schemes = %w(http https)
+      if schemes.include? url.scheme
+        u = url.dup
+        return schemes.any? { |s| u.scheme = s; has_key?(u) }
+      end
+
+      has_key?(url)
+    end
     
     #
     # Use a breadth-first search to calculate the single-source

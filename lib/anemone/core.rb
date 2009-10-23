@@ -208,7 +208,7 @@ module Anemone
         too_deep = false
       end
       
-      !@pages.has_key?(link) && !skip_link?(link) && allowed && !too_deep
+      !@pages.has_page?(link) && !skip_link?(link) && allowed && !too_deep
     end
     
     #
