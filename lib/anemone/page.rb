@@ -11,6 +11,8 @@ module Anemone
     
     # OpenStruct for user-stored data
     attr_accessor :data
+    # Nokogiri document for the HTML body
+    attr_accessor :doc
     # Integer response code of the page
     attr_accessor :code	
     # Array of redirect-aliases for the page
@@ -38,39 +40,28 @@ module Anemone
       @referer = referer
       @depth = depth || 0
       @response_time = response_time
-      @body = body
+      @doc = Nokogiri::HTML(body) if body && html? rescue nil
     end
-    
-    # Nokogiri document for the HTML body
-    def doc
-      @doc ||= @body && html? && Nokogiri::HTML(@body)
-    end
-    
+
     # Array of distinct A tag HREFs from the page
     def links
-      @links ||= begin
-        if doc
-          # get a list of distinct links on the page, in absolute url form
-          links = doc.css('a[href]').inject([]) do |list, link|
-            href = link.attributes['href'].content
-            unless href.nil? or href.empty?
-              url = to_absolute(href)
-              list << url if in_domain?(url)
-            end
-            list
-          end
-          
-          links.uniq!
-          links
-        else
-          []
-        end
+      return @links unless @links.nil?
+      @links = []
+      return @links if !doc
+      
+      doc.css('a').each do |a|
+        u = a.attributes['href'].content rescue nil
+        next if u.nil? or u.empty?
+        abs = to_absolute(URI(u)) rescue next
+        @links << abs if in_domain?(abs)
       end
+      @links.uniq!
+      @links
     end
     
     def discard_document!
       links # force parsing of page links before we trash the document
-      @body = @doc = nil
+      @doc = nil
     end
     
     #
