@@ -43,7 +43,7 @@ module Anemone
       @depth = depth || 0
       @response_time = response_time      
 
-      @aliases << aka if !aka.nil?
+      @aliases << aka unless aka.nil?
 
       if body
         begin

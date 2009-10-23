@@ -105,7 +105,7 @@ module Anemone
       link_queue = Queue.new
       page_queue = Queue.new
 
-      Anemone.options.threads.times do |id|
+      Anemone.options.threads.times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue).run }
       end
       
@@ -144,7 +144,7 @@ module Anemone
           end
           
           if page_queue.empty?
-            @tentacles.size.times { |i| link_queue.enq(:END)}
+            @tentacles.size.times { link_queue.enq(:END)}
             break
           end
         end
@@ -208,7 +208,7 @@ module Anemone
         too_deep = false
       end
       
-      !@pages.has_key?(link) and !skip_link?(link) and allowed and !too_deep
+      !@pages.has_key?(link) && !skip_link?(link) && allowed && !too_deep
     end
     
     #
@@ -217,7 +217,7 @@ module Anemone
     #
     def skip_link?(link)
       @skip_link_patterns.each { |p| return true if link.path =~ p}
-      return false
+      false
     end
     
   end
