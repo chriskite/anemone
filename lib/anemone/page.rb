@@ -59,7 +59,7 @@ module Anemone
       @links
     end
     
-    def discard_document!
+    def discard_doc!
       links # force parsing of page links before we trash the document
       @doc = nil
     end
