@@ -14,7 +14,7 @@ module Anemone
     # and optional *block*
     #
     def initialize(urls)
-      @urls = [urls].flatten.map{ |url| URI(url) if url.is_a?(String) }
+      @urls = [urls].flatten.map{ |url| url.is_a?(URI) ? url : URI(url) }
       @urls.each{ |url| url.path = '/' if url.path.empty? }
 
       @tentacles = []
