@@ -6,7 +6,7 @@ spec = Gem::Specification.new do |s|
   s.rubyforge_project = "anemone"
   s.platform = Gem::Platform::RUBY
   s.summary = "Anemone web-spider framework"
-  s.executables = %w[anemone_count.rb anemone_cron.rb anemone_pagedepth.rb anemone_serialize.rb anemone_url_list.rb]
+  s.executables = %w[anemone]
   s.require_path = "lib"
   s.has_rdoc = true
   s.rdoc_options << '-m' << 'README.rdoc' << '-t' << 'Anemone'
@@ -16,11 +16,7 @@ spec = Gem::Specification.new do |s|
   s.files = %w[
     LICENSE.txt
     README.rdoc
-    bin/anemone_count.rb
-    bin/anemone_cron.rb
-    bin/anemone_pagedepth.rb
-    bin/anemone_serialize.rb
-    bin/anemone_url_list.rb
+    bin/anemone
     lib/anemone.rb
     lib/anemone/anemone.rb
     lib/anemone/core.rb
@@ -28,6 +24,12 @@ spec = Gem::Specification.new do |s|
     lib/anemone/page.rb
     lib/anemone/page_hash.rb
     lib/anemone/tentacle.rb
+    lib/anemone/cli.rb
+    lib/anemone/cli/url_list.rb
+    lib/anemone/cli/cron.rb
+    lib/anemone/cli/count.rb
+    lib/anemone/cli/pagedepth.rb
+    lib/anemone/cli/serialize.rb
   ]
   
   s.test_files = %w[
