@@ -1,0 +1,17 @@
+== 0.2.2 / 2009-10-26
+
+* Minor enhancements
+
+  * When the :verbose option is set to true, exception backtraces are printed to aid debugging.
+
+== 0.2.1 / 2009-10-24
+
+* Major enhancements
+
+  * Added HTTPS support.
+  * CLI program 'anemone', which is a frontend for several tasks.
+
+* Minor enhancements
+
+  *HTTP request response time recorded in Page.
+  * Use of persistent HTTP connections.
