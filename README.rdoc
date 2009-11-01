@@ -21,6 +21,4 @@ See the scripts under the <tt>lib/anemone/cli</tt> directory for examples of sev
 
 == Requirements
 * nokogiri
-
-== Optional
-* fizx-robots (required if obey_robots_txt is set to true)
+* robots

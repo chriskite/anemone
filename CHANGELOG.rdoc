@@ -1,3 +1,13 @@
+== 0.2.3 / 2009-11-01
+
+* Minor enhancements
+
+  * Options are now applied per-crawl, rather than module-wide.
+
+* Bug fixes
+
+  * Fixed a bug which caused deadlock if an exception occurred when crawling the last page in the queue.
+
 == 0.2.2 / 2009-10-26
 
 * Minor enhancements

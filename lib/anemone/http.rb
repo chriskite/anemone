@@ -82,7 +82,7 @@ module Anemone
       rescue EOFError
         refresh_connection(url)
         retries += 1
-        retry unless retries > 1
+        retry unless retries > 3
       end
     end
 
