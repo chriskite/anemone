@@ -16,7 +16,7 @@ module Anemone
         end
 
         http = HTTP.new
-        http.fetch_page(URI('http://www.example.com')).should be_an_instance_of(Page)
+        http.fetch_page(SPEC_DOMAIN).should be_an_instance_of(Page)
       end
     end
   end

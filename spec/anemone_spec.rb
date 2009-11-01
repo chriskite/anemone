@@ -1,11 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 describe Anemone do
-  
-  before(:all) do
-    Anemone::FakePage.new
-  end
-  
+
   after(:each) do
     # reset global options object to defaults
     Anemone::DEFAULTS.each { |key, value| Anemone.options.send("#{key}=", value) }

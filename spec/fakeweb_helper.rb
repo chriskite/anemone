@@ -55,4 +55,3 @@ end
 
 #default root
 Anemone::FakePage.new
-
