@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'robots'
 require 'anemone/core'
 
 module Anemone
@@ -34,17 +35,6 @@ module Anemone
   #
   def Anemone.crawl(urls, options = {}, &block)
     options.each { |key, value| Anemone.options.send("#{key}=", value) }
-
-    if Anemone.options.obey_robots_txt
-      begin
-      require 'robots'
-      rescue LoadError
-        warn "To support the robot exclusion protocol, install the robots gem:\n" \
-          "sudo gem sources -a http://gems.github.com\n" \
-          "sudo gem install fizx-robots"
-        exit
-      end
-    end
 
     #use a single thread if a delay was requested
     Anemone.options.threads = 1 if Anemone.options.delay > 0
