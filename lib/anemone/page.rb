@@ -33,7 +33,7 @@ module Anemone
     def initialize(url, body = nil, code = nil, headers = nil, aka = nil, referer = nil, depth = 0, response_time = nil)
       @url = url
       @code = code
-      @headers = headers
+      @headers = headers || {}
       @headers['content-type'] ||= ['']
       @aliases = Array(aka)
       @data = OpenStruct.new
