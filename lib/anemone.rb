@@ -1,2 +1,2 @@
 require 'rubygems'
-require 'anemone/anemone'
+require 'anemone/core'

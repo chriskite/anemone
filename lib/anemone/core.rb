@@ -1,19 +1,51 @@
-require 'net/http'
 require 'thread'
+require 'robots'
 require 'anemone/tentacle'
 require 'anemone/page'
 require 'anemone/page_hash'
 
 module Anemone
+
+  VERSION = '0.2.3';
+
+  #
+  # Convenience method to start a crawl
+  #
+  def Anemone.crawl(urls, options = {}, &block)
+    Core.crawl(urls, options, &block)
+  end  
+
   class Core
     # PageHash storing all Page objects encountered during the crawl
     attr_reader :pages
-    
+
+    # Hash of options for the crawl
+    attr_accessor :opts
+
+    DEFAULT_OPTS = {
+      # run 4 Tentacle threads to fetch pages
+      :threads => 4,
+      # disable verbose output
+      :verbose => false,
+      # don't throw away the page response body after scanning it for links
+      :discard_page_bodies => false,
+      # identify self as Anemone/VERSION
+      :user_agent => "Anemone/#{Anemone::VERSION}",
+      # no delay between requests
+      :delay => 0,
+      # don't obey the robots exclusion protocol
+      :obey_robots_txt => false,
+      # by default, don't limit the depth of the crawl
+      :depth_limit => false,
+      # number of times HTTP redirects will be followed
+      :redirect_limit => 5
+    }
+
     #
     # Initialize the crawl with starting *urls* (single URL or Array of URLs)
     # and optional *block*
     #
-    def initialize(urls)
+    def initialize(urls, opts = {})
       @urls = [urls].flatten.map{ |url| url.is_a?(URI) ? url : URI(url) }
       @urls.each{ |url| url.path = '/' if url.path.empty? }
 
@@ -23,10 +55,8 @@ module Anemone
       @on_pages_like_blocks = Hash.new { |hash,key| hash[key] = [] }
       @skip_link_patterns = []
       @after_crawl_blocks = []
-      
-      if Anemone.options.obey_robots_txt
-        @robots = Robots.new(Anemone.options.user_agent)
-      end
+
+      process_options opts
 
       yield self if block_given?
     end
@@ -34,8 +64,8 @@ module Anemone
     #
     # Convenience method to start a new crawl
     #
-    def self.crawl(root)
-      self.new(root) do |core|
+    def self.crawl(urls, opts = {})
+      self.new(urls, opts) do |core|
         yield core if block_given?
         core.run
       end
@@ -104,8 +134,8 @@ module Anemone
       link_queue = Queue.new
       page_queue = Queue.new
 
-      Anemone.options.threads.times do
-        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue).run }
+      @opts[:threads].times do
+        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
       end
       
       @urls.each{ |url| link_queue.enq(url) }
@@ -115,12 +145,12 @@ module Anemone
         
         @pages[page.url] = page
         
-        puts "#{page.url} Queue: #{link_queue.size}" if Anemone.options.verbose
+        puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
         
         # perform the on_every_page blocks for this page
         do_page_blocks(page)
 
-        page.discard_doc! if Anemone.options.discard_page_bodies
+        page.discard_doc! if @opts[:discard_page_bodies]
         
         links_to_follow(page).each do |link|
           link_queue.enq([link, page])
@@ -158,7 +188,15 @@ module Anemone
     end
     
     private    
-    
+
+    def process_options(options)
+      @opts = DEFAULT_OPTS.merge options
+
+      @opts[:threads] = 1 if @opts[:delay] > 0
+
+      @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
+    end
+
     #
     # Execute the after_crawl blocks
     #
@@ -199,10 +237,10 @@ module Anemone
     # Returns +false+ otherwise.
     #
     def visit_link?(link, from_page = nil)
-      allowed = Anemone.options.obey_robots_txt ? @robots.allowed?(link) : true
+      allowed = @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
       
-      if from_page
-        too_deep = from_page.depth >= Anemone.options.depth_limit rescue false
+      if from_page && @opts[:depth_limit]
+        too_deep = from_page.depth >= @opts[:depth_limit]
       else
         too_deep = false
       end
@@ -215,8 +253,7 @@ module Anemone
     # its URL matches a skip_link pattern.
     #
     def skip_link?(link)
-      @skip_link_patterns.each { |p| return true if link.path =~ p}
-      false
+      @skip_link_patterns.any? { |p| link.path =~ p }
     end
     
   end

@@ -6,10 +6,11 @@ module Anemone
     #
     # Create a new Tentacle
     #
-    def initialize(link_queue, page_queue)
+    def initialize(link_queue, page_queue, opts = {})
       @link_queue = link_queue
       @page_queue = page_queue
-      @http = Anemone::HTTP.new
+      @http = Anemone::HTTP.new(opts)
+      @opts = opts
     end
     
     #
@@ -22,10 +23,16 @@ module Anemone
         
         break if link == :END
 
-        @page_queue.enq @http.fetch_page(link, from_page)
+        @page_queue << @http.fetch_page(link, from_page)
 
-        sleep Anemone.options.delay
+        delay
       end
+    end
+
+    private
+
+    def delay
+      sleep @opts[:delay] if @opts[:delay]
     end
 
   end

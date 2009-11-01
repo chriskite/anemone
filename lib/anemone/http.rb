@@ -4,10 +4,11 @@ require 'anemone/page'
 module Anemone
   class HTTP
     # Maximum number of redirects to follow on each get_response
-    REDIRECTION_LIMIT = 5
+    REDIRECT_LIMIT = 5
 
-    def initialize
+    def initialize(opts = {})
       @connections = {}
+      @opts = opts
     end
 
     #
@@ -31,7 +32,7 @@ module Anemone
 
         return Page.new(url, response.body.dup, code, response.to_hash, aka, referer, depth, response_time)
       rescue => e
-        if Anemone.options.verbose
+        if verbose?
           puts e.inspect
           puts e.backtrace
         end        
@@ -50,7 +51,7 @@ module Anemone
       code = Integer(response.code)
       loc = url
       
-      limit = REDIRECTION_LIMIT
+      limit = redirect_limit
       while response.is_a?(Net::HTTPRedirection) and limit > 0
           loc = URI(response['location'])
           loc = url.merge(loc) if loc.relative?
@@ -66,7 +67,6 @@ module Anemone
     #
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
-      user_agent = Anemone.options.user_agent rescue nil
       
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
@@ -104,5 +104,18 @@ module Anemone
       end
       @connections[url.host][url.port] = http.start      
     end
+
+    def redirect_limit
+      @opts[:redirect_limit] || REDIRECT_LIMIT
+    end
+
+    def user_agent
+      @opts[:user_agent]
+    end
+
+    def verbose?
+      @opts[:verbose]
+    end
+
   end
 end

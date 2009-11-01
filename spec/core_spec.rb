@@ -173,5 +173,29 @@ module Anemone
         core.should have(4).pages
       end
     end
+
+    describe "options" do
+      it "should accept options for the crawl" do
+        core = Anemone.crawl(SPEC_DOMAIN, :verbose => false,
+                                          :threads => 2,
+                                          :discard_page_bodies => true,
+                                          :user_agent => 'test',
+                                          :obey_robots_txt => true,
+                                          :depth_limit => 3)
+
+        core.opts[:verbose].should == false
+        core.opts[:threads].should == 2
+        core.opts[:discard_page_bodies].should == true
+        core.opts[:delay].should == 0
+        core.opts[:user_agent].should == 'test'
+        core.opts[:obey_robots_txt].should == true
+        core.opts[:depth_limit].should == 3
+      end
+
+      it "should use 1 thread if a delay is requested" do
+        Anemone.crawl(SPEC_DOMAIN, :delay => 0.01, :threads => 2).opts[:threads].should == 1
+      end
+    end
+
   end
 end

@@ -13,5 +13,5 @@
 
 * Minor enhancements
 
-  *HTTP request response time recorded in Page.
+  * HTTP request response time recorded in Page.
   * Use of persistent HTTP connections.
