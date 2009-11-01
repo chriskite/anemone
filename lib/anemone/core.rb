@@ -85,11 +85,7 @@ module Anemone
     # followed
     #
     def skip_links_like(*patterns)
-      if patterns
-        patterns.each do |pattern|
-          @skip_link_patterns << pattern
-        end
-      end
+      @skip_link_patterns.concat [patterns].flatten.compact
       self
     end
     
