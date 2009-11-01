@@ -30,7 +30,11 @@ module Anemone
         end
 
         return Page.new(url, response.body.dup, code, response.to_hash, aka, referer, depth, response_time)
-      rescue
+      rescue => e
+        if Anemone.options.verbose
+          puts e.inspect
+          puts e.backtrace
+        end        
         return Page.new(url)
       end
     end

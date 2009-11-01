@@ -3,7 +3,7 @@ require 'anemone/core'
 
 module Anemone
   # Version number
-  VERSION = '0.2.1'
+  VERSION = '0.2.2'
   
   # default options
   DEFAULTS = {
