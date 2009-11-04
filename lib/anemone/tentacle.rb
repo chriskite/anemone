@@ -2,7 +2,7 @@ require 'anemone/http'
 
 module Anemone
   class Tentacle
-    
+
     #
     # Create a new Tentacle
     #
@@ -12,18 +12,18 @@ module Anemone
       @http = Anemone::HTTP.new(opts)
       @opts = opts
     end
-    
+
     #
     # Gets links from @link_queue, and returns the fetched
     # Page objects into @page_queue
     #
     def run
       loop do
-        link, from_page = @link_queue.deq
-        
+        link, referer, depth = @link_queue.deq
+
         break if link == :END
 
-        @page_queue << @http.fetch_page(link, from_page)
+        @page_queue << @http.fetch_page(link, referer, depth)
 
         delay
       end

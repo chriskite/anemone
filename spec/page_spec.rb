@@ -3,11 +3,9 @@ require File.dirname(__FILE__) + '/spec_helper'
 module Anemone
   describe Page do
 
-    before(:all) do
-      @http = Anemone::HTTP.new
-    end
-
     before(:each) do
+      FakeWeb.clean_registry
+      @http = Anemone::HTTP.new
       @page = @http.fetch_page(FakePage.new('home').url)
     end
 

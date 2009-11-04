@@ -14,14 +14,9 @@ module Anemone
     #
     # Create a new Page from the response of an HTTP request to *url*
     #
-    def fetch_page(url, from_page = nil)
+    def fetch_page(url, referer = nil, depth = nil)
       begin
         url = URI(url) unless url.is_a?(URI)
-
-        if from_page
-          referer = from_page.url
-          depth = from_page.depth + 1
-        end
 
         response, code, location, response_time = get(url, referer)
 

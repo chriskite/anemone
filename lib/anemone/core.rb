@@ -149,7 +149,7 @@ module Anemone
 
         links = links_to_follow(page)
         links.each do |link|
-          link_queue << [link, page]
+          link_queue << [link, page.url.dup, page.depth + 1]
         end
         @pages.touch_keys links
 
