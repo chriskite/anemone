@@ -2,7 +2,8 @@ require 'thread'
 require 'robots'
 require 'anemone/tentacle'
 require 'anemone/page'
-require 'anemone/page_hash'
+require 'anemone/page_store'
+require 'anemone/storage'
 
 module Anemone
 
@@ -13,10 +14,10 @@ module Anemone
   #
   def Anemone.crawl(urls, options = {}, &block)
     Core.crawl(urls, options, &block)
-  end  
+  end
 
   class Core
-    # PageHash storing all Page objects encountered during the crawl
+    # PageStore storing all Page objects encountered during the crawl
     attr_reader :pages
 
     # Hash of options for the crawl
@@ -50,7 +51,7 @@ module Anemone
       @urls.each{ |url| url.path = '/' if url.path.empty? }
 
       @tentacles = []
-      @pages = PageHash.new
+      @pages = PageStore.new
       @on_every_page_blocks = []
       @on_pages_like_blocks = Hash.new { |hash,key| hash[key] = [] }
       @skip_link_patterns = []
@@ -60,7 +61,7 @@ module Anemone
 
       yield self if block_given?
     end
-    
+
     #
     # Convenience method to start a new crawl
     #
@@ -70,16 +71,16 @@ module Anemone
         core.run
       end
     end
-    
+
     #
-    # Add a block to be executed on the PageHash after the crawl
+    # Add a block to be executed on the PageStore after the crawl
     # is finished
     #
     def after_crawl(&block)
       @after_crawl_blocks << block
       self
     end
-    
+
     #
     # Add one ore more Regex patterns for URLs which should not be
     # followed
@@ -88,7 +89,7 @@ module Anemone
       @skip_link_patterns.concat [patterns].flatten.compact
       self
     end
-    
+
     #
     # Add a block to be executed on every Page as they are encountered
     # during the crawl
@@ -97,7 +98,7 @@ module Anemone
       @on_every_page_blocks << block
       self
     end
-    
+
     #
     # Add a block to be executed on Page objects with a URL matching
     # one or more patterns
@@ -110,7 +111,7 @@ module Anemone
       end
       self
     end
-    
+
     #
     # Specify a block which will select which links to follow on each page.
     # The block should return an Array of URI objects.
@@ -119,40 +120,40 @@ module Anemone
       @focus_crawl_block = block
       self
     end
-    
+
     #
     # Perform the crawl
     #
     def run
       @urls.delete_if { |url| !visit_link?(url) }
       return if @urls.empty?
-      
+
       link_queue = Queue.new
       page_queue = Queue.new
 
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
       end
-      
+
       @urls.each{ |url| link_queue.enq(url) }
 
       loop do
         page = page_queue.deq
-        
+
         @pages[page.url] = page
-        
+
         puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
-        
+
         # perform the on_every_page blocks for this page
         do_page_blocks(page)
 
         page.discard_doc! if @opts[:discard_page_bodies]
-        
+
         links_to_follow(page).each do |link|
           link_queue.enq([link, page])
           @pages[link] = nil
         end
-        
+
         # create an entry in the page hash for each alias of this page,
         # i.e. all the pages that redirected to this page
         page.aliases.each do |aka|
@@ -161,29 +162,29 @@ module Anemone
           end
           @pages[aka].add_alias!(page.url)
         end
-        
+
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?
           until link_queue.num_waiting == @tentacles.size
             Thread.pass
           end
-          
+
           if page_queue.empty?
             @tentacles.size.times { link_queue.enq(:END)}
             break
           end
         end
-        
+
       end
 
       @tentacles.each { |t| t.join }
 
       do_after_crawl_blocks()
-      
+
       self
     end
-    
-    private    
+
+    private
 
     def process_options(options)
       @opts = DEFAULT_OPTS.merge options
@@ -199,7 +200,7 @@ module Anemone
     def do_after_crawl_blocks
       @after_crawl_blocks.each {|b| b.call(@pages)}
     end
-    
+
     #
     # Execute the on_every_page blocks for *page*
     #
@@ -207,14 +208,14 @@ module Anemone
       @on_every_page_blocks.each do |blk|
         blk.call(page)
       end
-      
+
       @on_pages_like_blocks.each do |pattern, blks|
         if page.url.to_s =~ pattern
           blks.each { |blk| blk.call(page) }
         end
       end
-    end      
-    
+    end
+
     #
     # Return an Array of links to follow from the given page.
     # Based on whether or not the link has already been crawled,
@@ -224,7 +225,7 @@ module Anemone
       links = @focus_crawl_block ? @focus_crawl_block.call(page) : page.links
       links.select { |link| visit_link?(link, page) }
     end
-    
+
     #
     # Returns +true+ if *link* has not been visited already,
     # and is not excluded by a skip_link pattern...
@@ -234,16 +235,16 @@ module Anemone
     #
     def visit_link?(link, from_page = nil)
       allowed = @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
-      
+
       if from_page && @opts[:depth_limit]
         too_deep = from_page.depth >= @opts[:depth_limit]
       else
         too_deep = false
       end
-      
+
       !@pages.has_page?(link) && !skip_link?(link) && allowed && !too_deep
     end
-    
+
     #
     # Returns +true+ if *link* should not be visited because
     # its URL matches a skip_link pattern.
@@ -251,6 +252,6 @@ module Anemone
     def skip_link?(link)
       @skip_link_patterns.any? { |p| link.path =~ p }
     end
-    
+
   end
 end

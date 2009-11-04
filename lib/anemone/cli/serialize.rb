@@ -12,10 +12,10 @@ Usage:
 
 Synopsis:
   Crawls a site starting at the given URL and saves the resulting
-  PageHash object to a file using Marshal serialization.
+  PageStore object to a file using Marshal serialization.
 
 Options:
-  -o, --output filename      Filename to save PageHash to. Defaults to crawl.{Time.now}
+  -o, --output filename      Filename to save PageStore to. Defaults to crawl.{Time.now}
 INFO
   exit(0)
 end
