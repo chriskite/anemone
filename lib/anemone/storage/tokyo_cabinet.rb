@@ -4,25 +4,37 @@ module Anemone
   module Storage
     class TokyoCabinet
 
-      def initialize(file)
-        @store = Rufus::Tokyo::Cabinet.new(file)
-        @store.clear
+      def initialize(*args)
+        @db = Rufus::Tokyo::Cabinet.new(*args)
+        @db.clear
       end
 
       def [](key)
-        Marshal.load(@store[key])
+        Marshal.load @db[key]
       end
 
       def []=(key, value)
-        @store[key] = Marshal.dump(value)
+        @db[key] = Marshal.dump value
       end
 
       def has_key?(key)
-        @store.keys(:prefix => key).include? key
+        @db.keys(:prefix => key).include? key
+      end
+
+      def delete(key)
+        Marshal.load @db.delete(key)
+      end
+
+      def keys
+        @db.keys
+      end
+
+      def values
+        @db.values.map { |v| Marshal.load v }
       end
 
       def method_missing(symbol, *args)
-        @store.send(symbol, *args)
+        @db.send(symbol, *args)
       end
 
     end

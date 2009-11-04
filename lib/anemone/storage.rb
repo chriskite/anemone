@@ -10,9 +10,9 @@ module Anemone
       self::PStore.new(*args)
     end
 
-    def self.TokyoCabinet(file)
+    def self.TokyoCabinet(*args)
       require 'anemone/storage/tokyo_cabinet'
-      self::TokyoCabinet.new(file)
+      self::TokyoCabinet.new(*args)
     end
 
   end

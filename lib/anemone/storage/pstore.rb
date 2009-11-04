@@ -24,6 +24,7 @@ module Anemone
       end
 
       def delete(key)
+        @keys.delete(key)
         @store.transaction { |s| s.delete key}
       end
 
@@ -34,7 +35,7 @@ module Anemone
       end
 
       def keys
-        @keys
+        @keys.keys
       end
 
       def set_keys_nil keys
