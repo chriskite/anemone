@@ -27,6 +27,7 @@ spec = Gem::Specification.new do |s|
     lib/anemone/tentacle.rb
     lib/anemone/storage.rb
     lib/anemone/storage/pstore.rb
+    lib/anemone/storage/tokyo_cabinet.rb
     lib/anemone/cli.rb
     lib/anemone/cli/url_list.rb
     lib/anemone/cli/cron.rb

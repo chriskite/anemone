@@ -30,13 +30,19 @@ module Anemone
           aka = location
         end
 
-        return Page.new(url, response.body.dup, code, response.to_hash, aka, referer, depth, response_time)
+        return Page.new(url, :body => response.body.dup,
+                             :code => code,
+                             :headers => response.to_hash,
+                             :aka => aka,
+                             :referer => referer,
+                             :depth => depth,
+                             :response_time => response_time)
       rescue => e
         if verbose?
           puts e.inspect
           puts e.backtrace
-        end        
-        return Page.new(url)
+        end
+        return Page.new(url, :error => e)
       end
     end
 
@@ -45,12 +51,12 @@ module Anemone
     #
     # Retrieve an HTTP response for *url*, following redirects.
     # Returns the response object, response code, and final URI location.
-    # 
+    #
     def get(url, referer = nil)
       response, response_time = get_response(url, referer)
       code = Integer(response.code)
       loc = url
-      
+
       limit = redirect_limit
       while response.is_a?(Net::HTTPRedirection) and limit > 0
           loc = URI(response['location'])
@@ -61,13 +67,13 @@ module Anemone
 
       return response, code, loc, response_time
     end
-    
+
     #
     # Get an HTTPResponse for *url*, sending the appropriate User-Agent string
     #
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
-      
+
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
@@ -78,7 +84,7 @@ module Anemone
         response = connection(url).get(full_path, opts)
         finish = Time.now()
         response_time = ((finish - start) * 1000).round
-        return response, response_time 
+        return response, response_time
       rescue EOFError
         refresh_connection(url)
         retries += 1
@@ -102,7 +108,7 @@ module Anemone
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
-      @connections[url.host][url.port] = http.start      
+      @connections[url.host][url.port] = http.start
     end
 
     def redirect_limit

@@ -8,7 +8,9 @@ module Anemone
     attr_reader :url
     # Headers of the HTTP response
     attr_reader :headers
-
+    # Exception object, if one was raised during HTTP#fetch_page
+    attr_reader :error
+    
     # OpenStruct for user-stored data
     attr_accessor :data
     # Integer response code of the page
@@ -28,17 +30,21 @@ module Anemone
     #
     # Create a new page
     #
-    def initialize(url, body = nil, code = nil, headers = nil, aka = nil, referer = nil, depth = 0, response_time = nil)
+    def initialize(url, params = {})
       @url = url
-      @code = code
-      @headers = headers || {}
-      @headers['content-type'] ||= ['']
-      @aliases = Array(aka)
       @data = OpenStruct.new
-      @referer = referer
-      @depth = depth || 0
-      @response_time = response_time
-      @body = body
+
+      @code = params[:code]
+      @headers = params[:headers] || {}
+      @headers['content-type'] ||= ['']
+      @aliases = Array(params[:aka]).compact
+      @referer = params[:referer]
+      @depth = params[:depth] || 0
+      @response_time = params[:response_time]
+      @body = params[:body]
+      @error = params[:error]
+
+      @fetched = !params[:body].nil?
     end
 
     # Array of distinct A tag HREFs from the page
@@ -67,6 +73,10 @@ module Anemone
     def discard_doc!
       links # force parsing of page links before we trash the document
       @doc = @body = nil
+    end
+
+    def fetched?
+      @fetched
     end
 
     #
