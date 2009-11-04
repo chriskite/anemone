@@ -11,8 +11,6 @@ module Anemone
 
     # OpenStruct for user-stored data
     attr_accessor :data
-    # Nokogiri document for the HTML body
-    attr_accessor :doc
     # Integer response code of the page
     attr_accessor :code
     # Array of redirect-aliases for the page
@@ -27,16 +25,6 @@ module Anemone
     # Response time of the request for this page in milliseconds
     attr_accessor :response_time
 
-    def marshal_dump
-      doc = @doc.nil? ? nil : @doc.serialize
-      [@url, @headers, @data, doc, @code, @aliases, @visited, @depth, @referer, @response_time]
-    end
-
-    def marshal_load(ary)
-      @url, @headers, @data, @doc, @code, @aliases, @visited, @depth, @referer, @response_time = ary
-      @doc = Nokogiri::HTML(@doc) if @doc
-    end
-
     #
     # Create a new page
     #
@@ -50,7 +38,7 @@ module Anemone
       @referer = referer
       @depth = depth || 0
       @response_time = response_time
-      @doc = Nokogiri::HTML(body) if body && html? rescue nil
+      @body = body
     end
 
     # Array of distinct A tag HREFs from the page
@@ -69,9 +57,16 @@ module Anemone
       @links
     end
 
+    # Nokogiri document for the HTML body
+    def doc
+      return @doc if @doc
+      @doc = Nokogiri::HTML(@body) if @body && html? rescue nil
+    end
+
+    # Delete the Nokogiri document and response body to conserve memory
     def discard_doc!
       links # force parsing of page links before we trash the document
-      @doc = nil
+      @doc = @body = nil
     end
 
     #
@@ -161,5 +156,14 @@ module Anemone
     def in_domain?(uri)
       uri.host == @url.host
     end
+
+    def marshal_dump
+      [@url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time]
+    end
+
+    def marshal_load(ary)
+      @url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time = ary
+    end
+
   end
 end

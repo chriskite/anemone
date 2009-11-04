@@ -7,6 +7,7 @@ module Anemone
       def initialize(file)
         File.delete(file) if File.exists?(file)
         @store = ::PStore.new(file)
+        @keys = {}
       end
 
       def [](key)
@@ -14,11 +15,12 @@ module Anemone
       end
 
       def []=(key,value)
+        @keys[key] = nil
         @store.transaction { |s| s[key] = value }
       end
 
       def has_key?(key)
-        @store.transaction { |s| s.root? key}
+        @keys.has_key? key
       end
 
       def delete(key)
@@ -32,7 +34,13 @@ module Anemone
       end
 
       def keys
-         @store.transaction { |s| s.roots }
+        @keys
+      end
+
+      def set_keys_nil keys
+        @store.transaction do |s|
+          keys.each { |key| s[key] = nil; @keys[key] = nil }
+        end
       end
 
     end

@@ -147,10 +147,11 @@ module Anemone
 
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        links_to_follow(page).each do |link|
-          link_queue.enq([link, page])
-          @pages[link] = nil
+        links = links_to_follow(page)
+        links.each do |link|
+          link_queue << [link, page]
         end
+        @pages.set_keys_nil links
 
         # create an entry in the page hash for each alias of this page,
         # i.e. all the pages that redirected to this page

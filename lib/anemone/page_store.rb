@@ -39,6 +39,14 @@ module Anemone
       values.each { |value| yield value }
     end
 
+    def set_keys_nil keys
+      if @storage.respond_to? :set_keys_nil
+        @storage.set_keys_nil keys.map { |key| key.to_s }
+      else
+         keys.each { |key| self[key] = nil }
+      end
+    end
+
     # Does this PageStore contain the specified URL?
     # HTTP and HTTPS versions of a URL are considered to be the same page.
     def has_page?(url)
