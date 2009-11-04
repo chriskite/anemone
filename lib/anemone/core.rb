@@ -151,12 +151,12 @@ module Anemone
         links.each do |link|
           link_queue << [link, page]
         end
-        @pages.set_keys_nil links
+        @pages.touch_keys links
 
         # create an entry in the page hash for each alias of this page,
         # i.e. all the pages that redirected to this page
         page.aliases.each do |aka|
-          if !@pages.has_key?(aka) or @pages[aka].nil?
+          if !@pages.has_key?(aka) || !@pages[aka].fetched?
             @pages[aka] = page.alias_clone(aka)
           end
           @pages[aka].add_alias!(page.url)

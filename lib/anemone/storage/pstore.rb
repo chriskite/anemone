@@ -38,9 +38,13 @@ module Anemone
         @keys.keys
       end
 
-      def set_keys_nil keys
+      def size
+        keys.size
+      end
+
+      def merge! hash
         @store.transaction do |s|
-          keys.each { |key| s[key] = nil; @keys[key] = nil }
+          hash.each { |key, value| s[key] = value; @keys[key] = nil }
         end
       end
 

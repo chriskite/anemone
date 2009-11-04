@@ -28,7 +28,7 @@ module Anemone
     end
 
     def size
-      keys.size
+      @storage.size
     end
 
     def each
@@ -39,12 +39,8 @@ module Anemone
       values.each { |value| yield value }
     end
 
-    def set_keys_nil keys
-      if @storage.respond_to? :set_keys_nil
-        @storage.set_keys_nil keys.map { |key| key.to_s }
-      else
-         keys.each { |key| self[key] = nil }
-      end
+    def touch_keys keys
+      @storage.merge! keys.inject({}) { |h, k| h[k.to_s] = Page.new(k); h }
     end
 
     # Does this PageStore contain the specified URL?
