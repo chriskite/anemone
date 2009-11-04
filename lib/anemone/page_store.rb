@@ -78,20 +78,23 @@ module Anemone
       root_page.depth = 0
       root_page.visited = true
       self[root] = root_page
-      while(!q.empty?)
-        url = q.deq
-
-        next if !has_key?(url)
-
-        page = self[url]
-
+      while !q.empty?
+        page = self[q.deq]
         page.links.each do |u|
-          link = self[u]
-          next if !has_key?(u) or !link.fetched?
-          q.enq(u) if !link.visited
-          link.visited = true
-          link.depth = page.depth + 1
-          self[u] = link
+          begin
+            link = self[u]
+            next if link.nil? || !link.fetched? || link.visited
+
+            q << u unless link.redirect?
+            link.visited = true
+            link.depth = page.depth + 1
+            self[u] = link
+
+            if link.redirect?
+              u = link.redirect_to
+              redo
+            end
+          end
         end
       end
 

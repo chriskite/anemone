@@ -10,12 +10,12 @@ module Anemone
 
     shared_examples_for "page storage" do
       it "should be able to computer single-source shortest paths in-place" do
-        pages, size = [], 5
-        size.times do |n|
-          # register this page with a link to the next page
-          link = (n + 1).to_s if n + 1 < size
-          pages << FakePage.new(n.to_s, :links => Array(link))
-        end
+        pages = []
+        pages << FakePage.new('0', :links => ['1', '3'])
+        pages << FakePage.new('1', :redirect => '2')
+        pages << FakePage.new('2', :links => ['4'])
+        pages << FakePage.new('3')
+        pages << FakePage.new('4')
 
         # crawl, then set depths to nil
         page_store = Anemone.crawl(pages.first.url, @opts) do |a|
@@ -26,11 +26,15 @@ module Anemone
 
         page_store.should respond_to(:shortest_paths!)
 
-        page_store.shortest_paths!(pages.first.url)
-        pages.each_with_index { |page, i| page_store[page.url].depth.should == i }
+        page_store.shortest_paths!(pages[0].url)
+        page_store[pages[0].url].depth.should == 0
+        page_store[pages[1].url].depth.should == 1
+        page_store[pages[2].url].depth.should == 1
+        page_store[pages[3].url].depth.should == 1
+        page_store[pages[4].url].depth.should == 2
       end
 
-      it "should be able to remove all redirect aliases in-place" do
+      it "should be able to remove all redirects in-place" do
         pages = []
         pages << FakePage.new('0', :links => ['1'])
         pages << FakePage.new('1', :redirect => '2')
