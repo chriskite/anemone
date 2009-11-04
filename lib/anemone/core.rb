@@ -7,7 +7,7 @@ require 'anemone/storage'
 
 module Anemone
 
-  VERSION = '0.2.3';
+  VERSION = '0.3.0';
 
   #
   # Convenience method to start a crawl
@@ -51,7 +51,7 @@ module Anemone
       @urls.each{ |url| url.path = '/' if url.path.empty? }
 
       @tentacles = []
-      @pages = PageStore.new
+      @pages = PageStore.new(opts[:storage] || Anemone::Storage.Hash)
       @on_every_page_blocks = []
       @on_pages_like_blocks = Hash.new { |hash,key| hash[key] = [] }
       @skip_link_patterns = []
@@ -140,8 +140,6 @@ module Anemone
       loop do
         page = page_queue.deq
 
-        @pages[page.url] = page
-
         puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
 
         # perform the on_every_page blocks for this page
@@ -162,6 +160,8 @@ module Anemone
           end
           @pages[aka].add_alias!(page.url)
         end
+
+        @pages[page.url] = page
 
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?

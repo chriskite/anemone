@@ -27,6 +27,16 @@ module Anemone
     # Response time of the request for this page in milliseconds
     attr_accessor :response_time
 
+    def marshal_dump
+      doc = @doc.nil? ? nil : @doc.serialize
+      [@url, @headers, @data, doc, @code, @aliases, @visited, @depth, @referer, @response_time]
+    end
+
+    def marshal_load(ary)
+      @url, @headers, @data, @doc, @code, @aliases, @visited, @depth, @referer, @response_time = ary
+      @doc = Nokogiri::HTML(@doc) if @doc
+    end
+
     #
     # Create a new page
     #

@@ -5,6 +5,7 @@ module Anemone
     class PStore
 
       def initialize(file)
+        File.delete(file) if File.exists?(file)
         @store = ::PStore.new(file)
       end
 
