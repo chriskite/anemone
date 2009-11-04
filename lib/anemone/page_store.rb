@@ -115,12 +115,12 @@ module Anemone
     #
     def pages_linking_to(urls)
       unless urls.is_a?(Array)
-        urls = [urls] unless urls.is_a?(Array)
+        urls = [urls]
         single = true
       end
 
       urls.map! do |url|
-        if url.is_a?(String)
+        unless url.is_a?(URI)
           URI(url) rescue nil
         else
           url
@@ -135,7 +135,7 @@ module Anemone
       end
 
       if single and !links.empty?
-        return links.first
+        return links[urls.first]
       else
         return links
       end
@@ -155,7 +155,7 @@ module Anemone
       links.each { |url, pages| links[url] = pages.map{|p| p.url} }
 
       if single and !links.empty?
-        return links.first
+        return links[urls.first]
       else
         return links
       end
