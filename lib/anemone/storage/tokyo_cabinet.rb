@@ -18,7 +18,7 @@ module Anemone
       end
 
       def has_key?(key)
-        @db.keys(:prefix => key).include? key
+        !@db[key].nil?
       end
 
       def delete(key)

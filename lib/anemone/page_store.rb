@@ -63,13 +63,13 @@ module Anemone
       root = URI(root) if root.is_a?(String)
       raise "Root node not found" if !has_key?(root)
 
-      each_value {|p| p.visited = false if p}
-
       q = Queue.new
 
       q.enq(root)
-      self[root].depth = 0
-      self[root].visited = true
+      root_page = self[root]
+      root_page.depth = 0
+      root_page.visited = true
+      self[root] = root_page
       while(!q.empty?)
         url = q.deq
 
@@ -78,18 +78,20 @@ module Anemone
         page = self[url]
 
         page.links.each do |u|
-          next if !has_key?(u) or self[u].nil?
+          next if !has_key?(u) or !self[u].fetched?
           link = self[u]
           aliases = [link].concat(link.aliases.map {|a| self[a] })
 
           aliases.each do |node|
             if node.depth.nil? or page.depth + 1 < node.depth
               node.depth = page.depth + 1
+              self[node.url] = node
             end
           end
 
           q.enq(self[u].url) if !self[u].visited
-          self[u].visited = true
+          link.visited = true
+          self[u] = link
         end
       end
 
@@ -97,21 +99,14 @@ module Anemone
     end
 
     #
-    # Returns a new PageStore by removing redirect-aliases for each
-    # non-redirect Page
+    # Removes from storage the redirect-aliases for each non-redirect Page
     #
-    def uniq
-      results = PageStore.new
-      each do |url, page|
-        #if none of the aliases of this page have been added, and this isn't a redirect page, add this page
-        page_added = page.aliases.inject(false) { |r, a| r ||= results.has_key? a}
-        if !page.redirect? and !page_added
-          results[url] = page.clone
-          results[url].aliases = []
-        end
+    def uniq!
+      each_value do |page|
+        pages.aliases.each { |url| delete url } if !page.redirect?
       end
 
-      results
+      self
     end
 
     #
