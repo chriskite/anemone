@@ -10,7 +10,7 @@ module Anemone
     attr_reader :headers
     # Exception object, if one was raised during HTTP#fetch_page
     attr_reader :error
-    
+
     # OpenStruct for user-stored data
     attr_accessor :data
     # Integer response code of the page
@@ -168,11 +168,11 @@ module Anemone
     end
 
     def marshal_dump
-      [@url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time]
+      [@url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time, @fetched]
     end
 
     def marshal_load(ary)
-      @url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time = ary
+      @url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time, @fetched = ary
     end
 
   end

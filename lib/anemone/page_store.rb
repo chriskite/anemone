@@ -15,6 +15,10 @@ module Anemone
       @storage[index.to_s] = other
     end
 
+    def delete(key)
+      @storage.delete key
+    end
+
     def has_key?(key)
       @storage.has_key?(key.to_s)
     end
@@ -78,7 +82,9 @@ module Anemone
         page = self[url]
 
         page.links.each do |u|
+          p u
           next if !has_key?(u) or !self[u].fetched?
+          puts "okeh"
           link = self[u]
           aliases = [link].concat(link.aliases.map {|a| self[a] })
 
@@ -103,7 +109,7 @@ module Anemone
     #
     def uniq!
       each_value do |page|
-        pages.aliases.each { |url| delete url } if !page.redirect?
+        page.aliases.each { |url| delete url } if !page.redirect?
       end
 
       self
