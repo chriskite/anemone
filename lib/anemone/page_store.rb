@@ -16,7 +16,7 @@ module Anemone
     end
 
     def delete(key)
-      @storage.delete key
+      @storage.delete key.to_s
     end
 
     def has_key?(key)
@@ -43,7 +43,11 @@ module Anemone
       values.each { |value| yield value }
     end
 
-    def touch_keys keys
+    def touch_key(key)
+      self[key] = Page.new(key)
+    end
+
+    def touch_keys(keys)
       @storage.merge! keys.inject({}) { |h, k| h[k.to_s] = Page.new(k); h }
     end
 
@@ -82,21 +86,11 @@ module Anemone
         page = self[url]
 
         page.links.each do |u|
-          p u
-          next if !has_key?(u) or !self[u].fetched?
-          puts "okeh"
           link = self[u]
-          aliases = [link].concat(link.aliases.map {|a| self[a] })
-
-          aliases.each do |node|
-            if node.depth.nil? or page.depth + 1 < node.depth
-              node.depth = page.depth + 1
-              self[node.url] = node
-            end
-          end
-
-          q.enq(self[u].url) if !self[u].visited
+          next if !has_key?(u) or !link.fetched?
+          q.enq(u) if !link.visited
           link.visited = true
+          link.depth = page.depth + 1
           self[u] = link
         end
       end
@@ -105,13 +99,10 @@ module Anemone
     end
 
     #
-    # Removes from storage the redirect-aliases for each non-redirect Page
+    # Removes all Pages from storage where redirect? is true
     #
     def uniq!
-      each_value do |page|
-        page.aliases.each { |url| delete url } if !page.redirect?
-      end
-
+      each_value { |page| delete page.url if page.redirect? }
       self
     end
 

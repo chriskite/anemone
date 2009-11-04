@@ -139,7 +139,7 @@ module Anemone
 
       loop do
         page = page_queue.deq
-
+        @pages.touch_key page.url
         puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
 
         # perform the on_every_page blocks for this page
@@ -152,15 +152,6 @@ module Anemone
           link_queue << [link, page.url.dup, page.depth + 1]
         end
         @pages.touch_keys links
-
-        # create an entry in the page hash for each alias of this page,
-        # i.e. all the pages that redirected to this page
-        page.aliases.each do |aka|
-          if !@pages.has_key?(aka) || !@pages[aka].fetched?
-            @pages[aka] = page.alias_clone(aka)
-          end
-          @pages[aka].add_alias!(page.url)
-        end
 
         @pages[page.url] = page
 

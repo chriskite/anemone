@@ -48,7 +48,7 @@ module Anemone
 
       @page.redirect?.should == false
 
-      @http.fetch_page(FakePage.new('redir', :redirect => 'home').url).redirect?.should == true
+      @http.fetch_pages(FakePage.new('redir', :redirect => 'home').url).first.redirect?.should == true
     end
 
     it "should have a method to tell if a URI is in the same domain as the page" do

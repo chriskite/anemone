@@ -23,7 +23,7 @@ module Anemone
 
         break if link == :END
 
-        @page_queue << @http.fetch_page(link, referer, depth)
+        @http.fetch_pages(link, referer, depth).each { |page| @page_queue << page }
 
         delay
       end

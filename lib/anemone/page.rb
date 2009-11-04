@@ -8,6 +8,8 @@ module Anemone
     attr_reader :url
     # Headers of the HTTP response
     attr_reader :headers
+    # URL of the page this one redirected to, if any
+    attr_reader :redirect_to
     # Exception object, if one was raised during HTTP#fetch_page
     attr_reader :error
 
@@ -15,8 +17,6 @@ module Anemone
     attr_accessor :data
     # Integer response code of the page
     attr_accessor :code
-    # Array of redirect-aliases for the page
-    attr_accessor :aliases
     # Boolean indicating whether or not this page has been visited in PageStore#shortest_paths!
     attr_accessor :visited
     # Depth of this page from the root of the crawl. This is not necessarily the
@@ -40,11 +40,12 @@ module Anemone
       @aliases = Array(params[:aka]).compact
       @referer = params[:referer]
       @depth = params[:depth] || 0
+      @redirect_to = params[:redirect_to]
       @response_time = params[:response_time]
       @body = params[:body]
       @error = params[:error]
 
-      @fetched = !params[:body].nil?
+      @fetched = !params[:code].nil?
     end
 
     # Array of distinct A tag HREFs from the page
@@ -77,39 +78,6 @@ module Anemone
 
     def fetched?
       @fetched
-    end
-
-    #
-    # Return a new page with the same *response* and *url*, but
-    # with a 200 response code
-    #
-    def alias_clone(url)
-      p = clone
-	  p.add_alias!(@aka) if !@aka.nil?
-	  p.code = 200
-	  p
-    end
-
-    #
-    # Add a redirect-alias String *aka* to the list of the page's aliases
-    #
-    # Returns *self*
-    #
-    def add_alias!(aka)
-      @aliases << aka if !@aliases.include?(aka)
-      self
-    end
-
-    #
-    # Returns an Array of all links from this page, and all the
-    # redirect-aliases of those pages, as String objects.
-    #
-    # *page_hash* is a PageStore object with the results of the current crawl.
-    #
-    def links_and_their_aliases(page_hash)
-      links.inject([]) do |results, link|
-        results.concat([link].concat(page_hash[link].aliases))
-      end
     end
 
     #
@@ -168,11 +136,11 @@ module Anemone
     end
 
     def marshal_dump
-      [@url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time, @fetched]
+      [@url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @response_time, @fetched]
     end
 
     def marshal_load(ary)
-      @url, @headers, @data, @body, @links, @code, @aliases, @visited, @depth, @referer, @response_time, @fetched = ary
+      @url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @response_time, @fetched = ary
     end
 
   end

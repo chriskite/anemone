@@ -12,55 +12,65 @@ module Anemone
     end
 
     #
-    # Create a new Page from the response of an HTTP request to *url*
+    # Fetch a single Page from the response of an HTTP request to *url*.
+    # Just gets the final destination page.
     #
     def fetch_page(url, referer = nil, depth = nil)
+      fetch_pages(url, referer, depth).last
+    end
+
+    #
+    # Create new Pages from the response of an HTTP request to *url*,
+    # including redirects
+    #
+    def fetch_pages(url, referer = nil, depth = nil)
       begin
         url = URI(url) unless url.is_a?(URI)
-
-        response, code, location, response_time = get(url, referer)
-
-        aka = nil
-        if !url.eql?(location)
-          aka = location
+        pages = []
+        get(url, referer) do |response, code, location, redirect_to, response_time|
+          pages << Page.new(location, :body => response.body.dup,
+                                      :code => code,
+                                      :headers => response.to_hash,
+                                      :referer => referer,
+                                      :depth => depth,
+                                      :redirect_to => redirect_to,
+                                      :response_time => response_time)
         end
 
-        return Page.new(url, :body => response.body.dup,
-                             :code => code,
-                             :headers => response.to_hash,
-                             :aka => aka,
-                             :referer => referer,
-                             :depth => depth,
-                             :response_time => response_time)
+        return pages
       rescue => e
         if verbose?
           puts e.inspect
           puts e.backtrace
         end
-        return Page.new(url, :error => e)
+        return [Page.new(url, :error => e)]
       end
     end
 
     private
 
     #
-    # Retrieve an HTTP response for *url*, following redirects.
-    # Returns the response object, response code, and final URI location.
+    # Retrieve HTTP responses for *url*, including redirects.
+    # Yields the response object, response code, and URI location
+    # for each response.
     #
     def get(url, referer = nil)
       response, response_time = get_response(url, referer)
       code = Integer(response.code)
       loc = url
+      redirect_to = response.is_a?(Net::HTTPRedirection) ?  URI(response['location']) : nil
+      yield response, code, loc, redirect_to, response_time
 
       limit = redirect_limit
       while response.is_a?(Net::HTTPRedirection) and limit > 0
-          loc = URI(response['location'])
+          loc = redirect_to
           loc = url.merge(loc) if loc.relative?
           response, response_time = get_response(loc, referer)
+          code = Integer(response.code)
+          redirect_to = response.is_a?(Net::HTTPRedirection) ?  URI(response['location']) : nil
+          yield response, code, loc, redirect_to, response_time
           limit -= 1
       end
-
-      return response, code, loc, response_time
     end
 
     #
