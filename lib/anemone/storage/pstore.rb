@@ -1,8 +1,12 @@
 require 'pstore'
+require 'forwardable'
 
 module Anemone
   module Storage
     class PStore
+      extend Forwardable
+
+      def_delegators :@keys, :has_key?, :keys, :size
 
       def initialize(file)
         File.delete(file) if File.exists?(file)
@@ -19,10 +23,6 @@ module Anemone
         @store.transaction { |s| s[key] = value }
       end
 
-      def has_key?(key)
-        @keys.has_key? key
-      end
-
       def delete(key)
         @keys.delete(key)
         @store.transaction { |s| s.delete key}
@@ -32,14 +32,6 @@ module Anemone
         @store.transaction do |s|
           s.roots.map { |root| s[root] }
         end
-      end
-
-      def keys
-        @keys.keys
-      end
-
-      def size
-        keys.size
       end
 
       def merge! hash
