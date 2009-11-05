@@ -104,7 +104,7 @@ module Anemone
         return conn
       end
 
-      refresh_connection(url)
+      refresh_connection url
     end
 
     def refresh_connection(url)

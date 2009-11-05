@@ -20,7 +20,7 @@ module Anemone
     end
 
     def has_key?(key)
-      @storage.has_key?(key.to_s)
+      @storage.has_key? key.to_s
     end
 
     def keys
@@ -60,7 +60,7 @@ module Anemone
         return schemes.any? { |s| u.scheme = s; has_key?(u) }
       end
 
-      has_key?(url)
+      has_key? url
     end
 
     #
@@ -73,7 +73,7 @@ module Anemone
 
       q = Queue.new
 
-      q.enq(root)
+      q.enq root
       root_page = self[root]
       root_page.depth = 0
       root_page.visited = true
