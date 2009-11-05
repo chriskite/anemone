@@ -1,5 +1,10 @@
+require 'forwardable'
+
 module Anemone
   class PageStore
+    extend Forwardable
+
+    def_delegators :@storage, :keys, :values, :size
 
     def initialize(storage = {})
       @storage = storage
@@ -21,18 +26,6 @@ module Anemone
 
     def has_key?(key)
       @storage.has_key? key.to_s
-    end
-
-    def keys
-      @storage.keys
-    end
-
-    def values
-      @storage.values
-    end
-
-    def size
-      @storage.size
     end
 
     def each

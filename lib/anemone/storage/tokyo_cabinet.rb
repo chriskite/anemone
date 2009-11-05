@@ -1,8 +1,12 @@
 require 'rufus-tokyo'
+require 'forwardable'
 
 module Anemone
   module Storage
     class TokyoCabinet
+      extend Forwardable
+
+      def_delegators :@db, :close, :merge!, :size, :keys
 
       def initialize(*args)
         @db = Rufus::Tokyo::Cabinet.new(*args)
@@ -25,16 +29,8 @@ module Anemone
         Marshal.load @db.delete(key)
       end
 
-      def keys
-        @db.keys
-      end
-
       def values
         @db.values.map { |v| Marshal.load v }
-      end
-
-      def method_missing(symbol, *args)
-        @db.send(symbol, *args)
       end
 
     end
