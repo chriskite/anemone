@@ -162,7 +162,6 @@ module Anemone
             break
           end
         end
-
       end
 
       @tentacles.each { |t| t.join }
@@ -174,9 +173,7 @@ module Anemone
 
     def process_options(options)
       @opts = DEFAULT_OPTS.merge options
-
       @opts[:threads] = 1 if @opts[:delay] > 0
-
       @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
     end
 
@@ -196,9 +193,7 @@ module Anemone
       end
 
       @on_pages_like_blocks.each do |pattern, blks|
-        if page.url.to_s =~ pattern
-          blks.each { |blk| blk.call(page) }
-        end
+        blks.each { |blk| blk.call(page) } if page.url.to_s =~ pattern
       end
     end
 
