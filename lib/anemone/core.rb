@@ -141,13 +141,10 @@ module Anemone
         page = page_queue.deq
         @pages.touch_key page.url
         puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
-
-        # perform the on_every_page blocks for this page
-        do_page_blocks(page)
-
+        do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        links = links_to_follow(page)
+        links = links_to_follow page
         links.each do |link|
           link_queue << [link, page.url.dup, page.depth + 1]
         end
@@ -160,9 +157,8 @@ module Anemone
           until link_queue.num_waiting == @tentacles.size
             Thread.pass
           end
-
           if page_queue.empty?
-            @tentacles.size.times { link_queue.enq(:END)}
+            @tentacles.size.times { link_queue << :END }
             break
           end
         end
@@ -170,9 +166,7 @@ module Anemone
       end
 
       @tentacles.each { |t| t.join }
-
-      do_after_crawl_blocks()
-
+      do_after_crawl_blocks
       self
     end
 
@@ -190,7 +184,7 @@ module Anemone
     # Execute the after_crawl blocks
     #
     def do_after_crawl_blocks
-      @after_crawl_blocks.each {|b| b.call(@pages)}
+      @after_crawl_blocks.each { |b| b.call(@pages) }
     end
 
     #
