@@ -238,6 +238,25 @@ module Anemone
         core.opts[:depth_limit].should == 3
       end
 
+      it "should accept options via setter methods in the crawl block" do
+        core = Anemone.crawl(SPEC_DOMAIN) do |a|
+          a.verbose = false
+          a.threads = 2
+          a.discard_page_bodies = true
+          a.user_agent = 'test'
+          a.obey_robots_txt = true
+          a.depth_limit = 3
+        end
+
+        core.opts[:verbose].should == false
+        core.opts[:threads].should == 2
+        core.opts[:discard_page_bodies].should == true
+        core.opts[:delay].should == 0
+        core.opts[:user_agent].should == 'test'
+        core.opts[:obey_robots_txt].should == true
+        core.opts[:depth_limit].should == 3
+      end
+
       it "should use 1 thread if a delay is requested" do
         Anemone.crawl(SPEC_DOMAIN, :delay => 0.01, :threads => 2).opts[:threads].should == 1
       end

@@ -17,11 +17,11 @@ module Anemone
   end
 
   class Core
+
     # PageStore storing all Page objects encountered during the crawl
     attr_reader :pages
-
     # Hash of options for the crawl
-    attr_accessor :opts
+    attr_reader :opts
 
     DEFAULT_OPTS = {
       # run 4 Tentacle threads to fetch pages
@@ -39,8 +39,17 @@ module Anemone
       # by default, don't limit the depth of the crawl
       :depth_limit => false,
       # number of times HTTP redirects will be followed
-      :redirect_limit => 5
+      :redirect_limit => 5,
+      # storage engine defaults to Hash in +process_options+ if none specified
+      :storage => nil
     }
+
+    # Create setter methods for all options to be called from the crawl block
+    DEFAULT_OPTS.keys.each do |key|
+      define_method "#{key}=" do |*args|
+        @opts[key.to_sym] = *args
+      end
+    end
 
     #
     # Initialize the crawl with starting *urls* (single URL or Array of URLs)
@@ -51,13 +60,11 @@ module Anemone
       @urls.each{ |url| url.path = '/' if url.path.empty? }
 
       @tentacles = []
-      @pages = PageStore.new(opts[:storage] || Anemone::Storage.Hash)
       @on_every_page_blocks = []
       @on_pages_like_blocks = Hash.new { |hash,key| hash[key] = [] }
       @skip_link_patterns = []
       @after_crawl_blocks = []
-
-      process_options opts
+      @opts = opts
 
       yield self if block_given?
     end
@@ -125,6 +132,8 @@ module Anemone
     # Perform the crawl
     #
     def run
+      process_options
+
       @urls.delete_if { |url| !visit_link?(url) }
       return if @urls.empty?
 
@@ -171,9 +180,10 @@ module Anemone
 
     private
 
-    def process_options(options)
-      @opts = DEFAULT_OPTS.merge options
+    def process_options
+      @opts = DEFAULT_OPTS.merge @opts
       @opts[:threads] = 1 if @opts[:delay] > 0
+      @pages = PageStore.new(@opts[:storage] || Anemone::Storage.Hash)
       @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
     end
 
