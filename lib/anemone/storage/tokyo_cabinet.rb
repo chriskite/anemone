@@ -48,7 +48,7 @@ module Anemone
       def load_value(value)
         Marshal.load(value.unpack("m")[0])
       end
-      
+
     end
   end
 end
