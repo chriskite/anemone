@@ -38,6 +38,7 @@ module Anemone
         @store.transaction do |s|
           hash.each { |key, value| s[key] = value; @keys[key] = nil }
         end
+        self
       end
 
     end
