@@ -214,7 +214,7 @@ module Anemone
     #
     def links_to_follow(page)
       links = @focus_crawl_block ? @focus_crawl_block.call(page) : page.links
-      links.select { |link| visit_link?(link, page) }
+      links.select { |link| visit_link?(link, page) }.map { |link| link.dup }
     end
 
     #

@@ -1,4 +1,10 @@
-require 'rufus-tokyo'
+begin
+  require "rufus/tokyo"
+rescue LoadError
+  puts "You need the rufus-tokyo gem to use Anemone::Storage::TokyoCabinet"
+  exit
+end
+
 require 'forwardable'
 
 module Anemone
@@ -14,25 +20,35 @@ module Anemone
       end
 
       def [](key)
-        Marshal.load @db[key] rescue nil
+        if value = @db[key]
+          load_value(value)
+        end
       end
 
       def []=(key, value)
-        @db[key] = Marshal.dump value
+        @db[key] = [Marshal.dump(value)].pack("m")
       end
 
       def has_key?(key)
-        !@db[key].nil?
+        !!@db[key]
       end
 
       def delete(key)
-        Marshal.load @db.delete(key)
+        if value = @db.delete(key)
+          load_value(value)
+        end
       end
 
       def values
-        @db.values.map { |v| Marshal.load v }
+        @db.values.map { |v| load_value(v) }
       end
 
+      private
+
+      def load_value(value)
+        Marshal.load(value.unpack("m")[0])
+      end
+      
     end
   end
 end
