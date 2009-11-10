@@ -40,7 +40,7 @@ module Anemone
       @aliases = Array(params[:aka]).compact
       @referer = params[:referer]
       @depth = params[:depth] || 0
-      @redirect_to = params[:redirect_to]
+      @redirect_to = to_absolute(params[:redirect_to])
       @response_time = params[:response_time]
       @body = params[:body]
       @error = params[:error]
@@ -116,6 +116,8 @@ module Anemone
     # location of the page
     #
     def to_absolute(link)
+      return nil if link.nil?
+
       # remove anchor
       link = URI.encode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,''))
 

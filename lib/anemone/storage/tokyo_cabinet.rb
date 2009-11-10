@@ -14,7 +14,7 @@ module Anemone
       end
 
       def [](key)
-        Marshal.load @db[key]
+        Marshal.load @db[key] rescue nil
       end
 
       def []=(key, value)
