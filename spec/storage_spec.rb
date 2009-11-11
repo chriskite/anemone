@@ -67,6 +67,16 @@ module Anemone
 
           @store.values.should == keys
         end
+
+        it "should implement merge!, and return self" do
+          @store.should respond_to(:merge!)
+
+          hash = {'a' => 'a', 'b' => 'b', 'c' => 'c'}
+          merged = @store.merge! hash
+          hash.each { |key, value| @store[key].should == value }
+
+          merged.should === @store
+        end
       end
 
       describe PStore do
