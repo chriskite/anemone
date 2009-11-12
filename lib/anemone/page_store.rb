@@ -4,7 +4,7 @@ module Anemone
   class PageStore
     extend Forwardable
 
-    def_delegators :@storage, :keys, :values, :size
+    def_delegators :@storage, :keys, :values, :size, :each
 
     def initialize(storage = {})
       @storage = storage
@@ -28,12 +28,14 @@ module Anemone
       @storage.has_key? key.to_s
     end
 
-    def each
-      keys.each { |key| yield key, self[key] }
+    def each_value
+      each { |key, value| yield value }
     end
 
-    def each_value
-      values.each { |value| yield value }
+    def values
+      result = []
+      each { |key, value| result << value }
+      result
     end
 
     def touch_key(key)

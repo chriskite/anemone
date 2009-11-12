@@ -59,13 +59,15 @@ module Anemone
           @store.keys.should == keys
         end
 
-        it "should implement values" do
-          @store.should respond_to(:values)
+        it "should implement each" do
+          @store.should respond_to(:each)
 
           keys = ['a', 'b', 'c']
           keys.each { |key| @store[key] = key }
 
-          @store.values.should == keys
+          result = {}
+          @store.each { |k, v| result[k] = v }
+          result.values.should == keys
         end
 
         it "should implement merge!, and return self" do

@@ -28,13 +28,15 @@ module Anemone
         @store.transaction { |s| s.delete key}
       end
 
-      def values
-        @store.transaction do |s|
-          s.roots.map { |root| s[root] }
+      def each
+        @keys.each_key do |key|
+          value = nil
+          @store.transaction { |s| value = s[key] }
+          yield key, value
         end
       end
 
-      def merge! hash
+      def merge!(hash)
         @store.transaction do |s|
           hash.each { |key, value| s[key] = value; @keys[key] = nil }
         end

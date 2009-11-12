@@ -36,8 +36,8 @@ module Anemone
         value
       end
 
-      def values
-        @db.values.map { |v| load_value(v) }
+      def each
+        @db.each { |k, v| yield k, load_value(v) }
       end
 
       def merge!(hash)
