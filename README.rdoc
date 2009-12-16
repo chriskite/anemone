@@ -15,6 +15,8 @@ See http://anemone.rubyforge.org for more information.
 * HTTPS support
 * Records response time for each page
 * CLI program can list all pages in a domain, calculate page depths, and more
+* Obey robots.txt
+* In-memory or persistent storage of pages during crawl, using TokyoCabinet or PStore
 
 == Examples
 See the scripts under the <tt>lib/anemone/cli</tt> directory for examples of several useful Anemone tasks.

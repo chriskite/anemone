@@ -1,3 +1,13 @@
+== 0.3.0 / 2009-12-15
+
+* Major enchancements
+
+  * Option for persistent storage of pages during crawl with TokyoCabinet or PStore
+
+* Minor enhancements
+
+  * Options can be set via methods on the Core object in the crawl block
+
 == 0.2.3 / 2009-11-01
 
 * Minor enhancements
