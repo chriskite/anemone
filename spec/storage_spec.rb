@@ -111,6 +111,11 @@ module Anemone
         after(:all) do
           File.delete @test_file rescue nil
         end
+
+        it "should raise an error if supplied with a file extension other than .tch" do
+          lambda { Anemone::Storage.TokyoCabinet('test.tmp') }.should raise_error(RuntimeError)
+        end
+
       end
 
     end
