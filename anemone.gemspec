@@ -40,6 +40,7 @@ spec = Gem::Specification.new do |s|
     spec/anemone_spec.rb
     spec/core_spec.rb
     spec/page_spec.rb
+    spec/page_store_spec.rb
     spec/http_spec.rb
     spec/storage_spec.rb
     spec/fakeweb_helper.rb
