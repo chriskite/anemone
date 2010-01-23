@@ -7,7 +7,7 @@ require 'anemone/storage'
 
 module Anemone
 
-  VERSION = '0.3.0';
+  VERSION = '0.3.1';
 
   #
   # Convenience method to start a crawl
