@@ -17,6 +17,12 @@ module Anemone
       fail_page.fetched?.should == false
     end
 
+    it "should store and expose the response body of the HTTP request" do
+      body = 'test'
+      page = @http.fetch_page(FakePage.new('body_test', {:body => body}).url)
+      page.body.should == body
+    end
+
     it "should record any error that occurs during fetch_page" do
       @page.should respond_to(:error)
       @page.error.should be_nil

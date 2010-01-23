@@ -6,6 +6,8 @@ module Anemone
 
     # The URL of the page
     attr_reader :url
+    # The raw HTTP response body of the page
+    attr_reader :body
     # Headers of the HTTP response
     attr_reader :headers
     # URL of the page this one redirected to, if any
@@ -48,7 +50,9 @@ module Anemone
       @fetched = !params[:code].nil?
     end
 
+    #
     # Array of distinct A tag HREFs from the page
+    #
     def links
       return @links unless @links.nil?
       @links = []
@@ -64,18 +68,26 @@ module Anemone
       @links
     end
 
+    #
     # Nokogiri document for the HTML body
+    #
     def doc
       return @doc if @doc
       @doc = Nokogiri::HTML(@body) if @body && html? rescue nil
     end
 
+    #
     # Delete the Nokogiri document and response body to conserve memory
+    #
     def discard_doc!
       links # force parsing of page links before we trash the document
       @doc = @body = nil
     end
 
+    #
+    # Was the page successfully fetched?
+    # +true+ if the page was fetched with no error, +false+ otherwise.
+    #
     def fetched?
       @fetched
     end
