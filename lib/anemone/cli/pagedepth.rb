@@ -17,16 +17,16 @@ end
 
 Anemone.crawl(root) do |anemone|
   anemone.skip_links_like %r{^/c/$}, %r{^/stores/$}
-  
+
   anemone.after_crawl do |pages|
-    pages = pages.shortest_paths!(root).uniq
-    
+    pages = pages.shortest_paths!(root).uniq!
+
     depths = pages.values.inject({}) do |depths, page|
       depths[page.depth] ||= 0
       depths[page.depth] += 1
       depths
     end
-    
+
     depths.sort.each { |depth, count| puts "Depth: #{depth} Count: #{count}" }
   end
 end

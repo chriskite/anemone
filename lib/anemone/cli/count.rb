@@ -7,7 +7,7 @@ rescue
   puts <<-INFO
 Usage:
   anemone count <url>
-  
+
 Synopsis:
   Crawls a site starting at the given URL and outputs the total number
   of unique pages on the site.
@@ -17,6 +17,6 @@ end
 
 Anemone.crawl(url) do |anemone|
   anemone.after_crawl do |pages|
-    puts pages.uniq.size
+    puts pages.uniq!.size
   end
 end
