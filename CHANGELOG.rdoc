@@ -1,3 +1,13 @@
+== 0.3.1 / 2010-01-22
+
+* Minor enhancements
+
+  * Added an attr_accessor to Page for the HTTP response body
+
+* Bug fixes
+
+  * Fixed incorrect method calls in CLI scripts
+
 == 0.3.0 / 2009-12-15
 
 * Major enchancements
