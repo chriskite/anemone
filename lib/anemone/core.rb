@@ -46,8 +46,8 @@ module Anemone
 
     # Create setter methods for all options to be called from the crawl block
     DEFAULT_OPTS.keys.each do |key|
-      define_method "#{key}=" do |*args|
-        @opts[key.to_sym] = *args
+      define_method "#{key}=" do |value|
+        @opts[key.to_sym] = value
       end
     end
 
