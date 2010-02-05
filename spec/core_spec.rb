@@ -19,9 +19,20 @@ module Anemone
         Anemone.crawl(pages[0].url, @opts).should have(4).pages
       end
 
-      it "should not leave the original domain" do
+      it "should not follow links that leave the original domain" do
         pages = []
         pages << FakePage.new('0', :links => ['1'], :hrefs => 'http://www.other.com/')
+        pages << FakePage.new('1')
+
+        core = Anemone.crawl(pages[0].url, @opts)
+
+        core.should have(2).pages
+        core.pages.keys.should_not include('http://www.other.com/')
+      end
+
+      it "should not follow redirects that leave the original domain" do
+        pages = []
+        pages << FakePage.new('0', :links => ['1'], :redirect => 'http://www.other.com/')
         pages << FakePage.new('1')
 
         core = Anemone.crawl(pages[0].url, @opts)

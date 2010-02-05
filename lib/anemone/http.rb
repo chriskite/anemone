@@ -62,7 +62,7 @@ module Anemone
       yield response, code, loc, redirect_to, response_time
 
       limit = redirect_limit
-      while response.is_a?(Net::HTTPRedirection) and limit > 0
+      while redirect_to && allowed?(redirect_to, url) && limit > 0
           loc = redirect_to
           loc = url.merge(loc) if loc.relative?
           response, response_time = get_response(loc, referer)
@@ -126,6 +126,13 @@ module Anemone
 
     def verbose?
       @opts[:verbose]
+    end
+
+    #
+    # Allowed to connect to the requested url?
+    #
+    def allowed?(to_url, from_url)
+      to_url.host.nil? || (to_url.host == from_url.host)
     end
 
   end
