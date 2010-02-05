@@ -173,7 +173,7 @@ module Anemone
         end
       end
 
-      @tentacles.each { |t| t.join }
+      @tentacles.each { |thread| thread.join }
       do_after_crawl_blocks
       self
     end
@@ -191,19 +191,19 @@ module Anemone
     # Execute the after_crawl blocks
     #
     def do_after_crawl_blocks
-      @after_crawl_blocks.each { |b| b.call(@pages) }
+      @after_crawl_blocks.each { |block| block.call(@pages) }
     end
 
     #
     # Execute the on_every_page blocks for *page*
     #
     def do_page_blocks(page)
-      @on_every_page_blocks.each do |blk|
-        blk.call(page)
+      @on_every_page_blocks.each do |block|
+        block.call(page)
       end
 
-      @on_pages_like_blocks.each do |pattern, blks|
-        blks.each { |blk| blk.call(page) } if page.url.to_s =~ pattern
+      @on_pages_like_blocks.each do |pattern, blocks|
+        blocks.each { |block| block.call(page) } if page.url.to_s =~ pattern
       end
     end
 
@@ -241,7 +241,7 @@ module Anemone
     # its URL matches a skip_link pattern.
     #
     def skip_link?(link)
-      @skip_link_patterns.any? { |p| link.path =~ p }
+      @skip_link_patterns.any? { |pattern| link.path =~ pattern }
     end
 
   end
