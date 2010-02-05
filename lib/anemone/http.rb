@@ -55,22 +55,19 @@ module Anemone
     # for each response.
     #
     def get(url, referer = nil)
-      response, response_time = get_response(url, referer)
-      code = Integer(response.code)
-      loc = url
-      redirect_to = response.is_a?(Net::HTTPRedirection) ?  URI(response['location']) : nil
-      yield response, code, loc, redirect_to, response_time
-
       limit = redirect_limit
-      while redirect_to && allowed?(redirect_to, url) && limit > 0
-          loc = redirect_to
+      loc = url
+      begin
+          # if redirected to a relative url, merge it with the host of the original
+          # request url
           loc = url.merge(loc) if loc.relative?
+
           response, response_time = get_response(loc, referer)
           code = Integer(response.code)
           redirect_to = response.is_a?(Net::HTTPRedirection) ?  URI(response['location']) : nil
           yield response, code, loc, redirect_to, response_time
           limit -= 1
-      end
+      end while (loc = redirect_to) && allowed?(redirect_to, url) && limit > 0
     end
 
     #
