@@ -43,7 +43,9 @@ module Anemone
       # storage engine defaults to Hash in +process_options+ if none specified
       :storage => nil,
       # Hash of cookie name => value to send with HTTP requests
-      :cookies => nil
+      :cookies => nil,
+      # accept cookies from the server and send them back?
+      :accept_cookies => false
     }
 
     # Create setter methods for all options to be called from the crawl block

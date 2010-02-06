@@ -1,14 +1,19 @@
 require 'net/https'
 require 'anemone/page'
+require 'anemone/cookie_store'
 
 module Anemone
   class HTTP
     # Maximum number of redirects to follow on each get_response
     REDIRECT_LIMIT = 5
 
+    # CookieStore for this HTTP client
+    attr_reader :cookie_store
+
     def initialize(opts = {})
       @connections = {}
       @opts = opts
+      @cookie_store = CookieStore.new(@opts[:cookies])
     end
 
     #
@@ -63,12 +68,10 @@ module Anemone
     end
 
     #
-    # The HTTP cookie string, or nil if no cookies option set
+    # Does this HTTP client accept cookies from the server?
     #
-    def cookies
-      return nil if @opts[:cookies].nil?
-      # convert cookies Hash into HTTP Cookie string
-      @cookie ||= @opts[:cookies].map { |name, value| "#{name}=#{value}" }.join(';')
+    def accept_cookies?
+      @opts[:accept_cookies]
     end
 
     private
@@ -103,7 +106,7 @@ module Anemone
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
-      opts['Cookie'] = cookies if cookies
+      opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty?
 
       retries = 0
       begin
@@ -111,6 +114,7 @@ module Anemone
         response = connection(url).get(full_path, opts)
         finish = Time.now()
         response_time = ((finish - start) * 1000).round
+        @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?
         return response, response_time
       rescue EOFError
         refresh_connection(url)
