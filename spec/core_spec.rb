@@ -162,6 +162,16 @@ module Anemone
         core.opts[:cookies].should == cookies
       end
 
+      it "should freeze the options once the crawl begins" do
+        core = Anemone.crawl(FakePage.new('0').url) do |anemone|
+          anemone.threads = 4
+          anemone.on_every_page do
+            lambda {anemone.threads = 2}.should raise_error
+          end
+        end
+        core.opts[:threads].should == 4
+      end
+
       describe "many pages" do
         before(:each) do
           @pages, size = [], 5

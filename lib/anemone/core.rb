@@ -187,6 +187,18 @@ module Anemone
       @opts[:threads] = 1 if @opts[:delay] > 0
       @pages = PageStore.new(@opts[:storage] || Anemone::Storage.Hash)
       @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
+
+      freeze_options
+    end
+
+    #
+    # Freeze the opts Hash so that no options can be modified
+    # once the crawl begins
+    #
+    def freeze_options
+      @opts.freeze
+      @opts.each_key { |key| @opts[key].freeze }
+      @opts[:cookies].each_key { |key| @opts[:cookies][key].freeze } rescue nil
     end
 
     #
