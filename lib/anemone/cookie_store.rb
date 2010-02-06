@@ -1,15 +1,9 @@
-require 'forwardable'
-
 module Anemone
-  class CookieStore
-    extend Forwardable
-
-    def_delegators :@cookies, :empty?
-
-    attr_reader :cookies
+  class CookieStore < Hash
 
     def initialize(cookies = nil)
-      @cookies = cookies || {}
+      super
+      cookies.each { |key, value| self[key] = value } if cookies
     end
 
     def merge!(set_cookie_str)
@@ -18,11 +12,11 @@ module Anemone
         key, value = pair.strip.split('=')
         acc[key] = value if key
       end
-      @cookies.merge! cookie_hash
+      super(cookie_hash)
     end
 
     def to_s
-      @cookies.map { |name, value| "#{name}=#{value}" }.join(';')
+      self.map { |name, value| "#{name}=#{value}" }.join(';')
     end
 
   end

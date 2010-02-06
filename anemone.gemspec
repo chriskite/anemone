@@ -20,6 +20,7 @@ spec = Gem::Specification.new do |s|
     README.rdoc
     bin/anemone
     lib/anemone.rb
+    lib/anemone/cookie_store.rb
     lib/anemone/core.rb
     lib/anemone/http.rb
     lib/anemone/page.rb
