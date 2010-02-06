@@ -79,6 +79,7 @@ module Anemone
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
+      opts['Cookie'] = cookie if cookie
 
       retries = 0
       begin
@@ -119,6 +120,10 @@ module Anemone
 
     def user_agent
       @opts[:user_agent]
+    end
+
+    def cookie
+      @opts[:cookie]
     end
 
     def verbose?

@@ -129,6 +129,16 @@ module Anemone
     end
 
     #
+    # Set cookie(s) to send with HTTP requests.
+    # Either specify +name+ and +contents+ for a single cookie,
+    # or pass a Hash of :name => contents to set multiple cookies.
+    #
+    def set_cookie(name, contents = nil)
+      name = { name.to_sym => contents } if !name.is_a?(Hash)
+      @opts[:cookie] = name.map { |key, value| "#{key}=#{value}" }.join(';')
+    end
+
+    #
     # Perform the crawl
     #
     def run

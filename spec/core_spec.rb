@@ -154,6 +154,18 @@ module Anemone
         urls.should_not include(pages[1].url)
       end
 
+      it "should be able to set cookies to send with HTTP requests" do
+        core = Anemone.crawl(FakePage.new('0').url) do |anemone|
+          anemone.set_cookie('test', 'cookie')
+        end
+        core.opts[:cookie].should == 'test=cookie'
+
+        core = Anemone.crawl(FakePage.new('0').url) do |anemone|
+          anemone.set_cookie({:a => '1', :b => '2'})
+        end
+        core.opts[:cookie].should == 'a=1;b=2'
+      end
+
       describe "many pages" do
         before(:each) do
           @pages, size = [], 5
