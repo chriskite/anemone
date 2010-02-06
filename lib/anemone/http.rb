@@ -47,6 +47,30 @@ module Anemone
       end
     end
 
+    #
+    # The maximum number of redirects to follow
+    #
+    def redirect_limit
+      @opts[:redirect_limit] || REDIRECT_LIMIT
+    end
+
+    #
+    # The user-agent string which will be sent with each request,
+    # or nil if no such option is set
+    #
+    def user_agent
+      @opts[:user_agent]
+    end
+
+    #
+    # The HTTP cookie string, or nil if no cookies option set
+    #
+    def cookies
+      return nil if @opts[:cookies].nil?
+      # convert cookies Hash into HTTP Cookie string
+      @cookie ||= @opts[:cookies].map { |name, value| "#{name}=#{value}" }.join(';')
+    end
+
     private
 
     #
@@ -79,7 +103,7 @@ module Anemone
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
-      opts['Cookie'] = cookie if cookie
+      opts['Cookie'] = cookies if cookies
 
       retries = 0
       begin
@@ -112,18 +136,6 @@ module Anemone
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
       @connections[url.host][url.port] = http.start
-    end
-
-    def redirect_limit
-      @opts[:redirect_limit] || REDIRECT_LIMIT
-    end
-
-    def user_agent
-      @opts[:user_agent]
-    end
-
-    def cookie
-      @opts[:cookie]
     end
 
     def verbose?

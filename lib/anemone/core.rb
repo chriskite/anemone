@@ -41,7 +41,9 @@ module Anemone
       # number of times HTTP redirects will be followed
       :redirect_limit => 5,
       # storage engine defaults to Hash in +process_options+ if none specified
-      :storage => nil
+      :storage => nil,
+      # Hash of cookie name => value to send with HTTP requests
+      :cookies => nil
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -126,16 +128,6 @@ module Anemone
     def focus_crawl(&block)
       @focus_crawl_block = block
       self
-    end
-
-    #
-    # Set cookie(s) to send with HTTP requests.
-    # Either specify +name+ and +contents+ for a single cookie,
-    # or pass a Hash of :name => contents to set multiple cookies.
-    #
-    def set_cookie(name, contents = nil)
-      name = { name.to_sym => contents } if !name.is_a?(Hash)
-      @opts[:cookie] = name.map { |key, value| "#{key}=#{value}" }.join(';')
     end
 
     #

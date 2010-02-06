@@ -155,15 +155,11 @@ module Anemone
       end
 
       it "should be able to set cookies to send with HTTP requests" do
+        cookies = {:a => '1', :b => '2'}
         core = Anemone.crawl(FakePage.new('0').url) do |anemone|
-          anemone.set_cookie('test', 'cookie')
+          anemone.cookies = cookies
         end
-        core.opts[:cookie].should == 'test=cookie'
-
-        core = Anemone.crawl(FakePage.new('0').url) do |anemone|
-          anemone.set_cookie({:a => '1', :b => '2'})
-        end
-        core.opts[:cookie].should == 'a=1;b=2'
+        core.opts[:cookies].should == cookies
       end
 
       describe "many pages" do

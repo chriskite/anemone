@@ -18,6 +18,13 @@ module Anemone
         http = Anemone::HTTP.new
         http.fetch_page(SPEC_DOMAIN).should be_an_instance_of(Page)
       end
+
+      it "should convert the cookies option Hash into an HTTP cookie string" do
+        opts = {:cookies => {:a => '1', :b => '2'}}
+        http = Anemone::HTTP.new(opts)
+        http.cookies.should == "a=1;b=2"
+      end
+
     end
   end
 end
