@@ -68,5 +68,10 @@ module Anemone
       @page.should respond_to(:response_time)
     end
 
+    it "should have the cookies received with the page" do
+      @page.should respond_to(:cookies)
+      @page.cookies.should == []
+    end
+
   end
 end

@@ -17,11 +17,14 @@ module Anemone
     end
 
     def merge!(set_cookie_str)
-      cookie_hash = WEBrick::Cookie.parse_set_cookies(set_cookie_str).inject({}) do |hash, cookie|
-        hash[cookie.name] = cookie if !!cookie
-        hash
+      begin
+        cookie_hash = WEBrick::Cookie.parse_set_cookies(set_cookie_str).inject({}) do |hash, cookie|
+          hash[cookie.name] = cookie if !!cookie
+          hash
+        end
+        @cookies.merge! cookie_hash
+      rescue
       end
-      @cookies.merge! cookie_hash
     end
 
     def to_s
