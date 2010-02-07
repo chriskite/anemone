@@ -106,7 +106,7 @@ module Anemone
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
-      opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty?
+      opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty? || (!accept_cookies? && @opts[:cookies].nil?)
 
       retries = 0
       begin

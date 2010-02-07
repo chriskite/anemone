@@ -1,22 +1,31 @@
+require 'delegate'
+require 'webrick/cookie'
+
+class WEBrick::Cookie
+  def expired?
+    !!expires && expires < Time.now
+  end
+end
+
 module Anemone
-  class CookieStore < Hash
+  class CookieStore < DelegateClass(Hash)
 
     def initialize(cookies = nil)
-      super
-      cookies.each { |key, value| self[key] = value } if cookies
+      @cookies = {}
+      cookies.each { |name, value| @cookies[name] = WEBrick::Cookie.new(name, value) } if cookies
+      super(@cookies)
     end
 
     def merge!(set_cookie_str)
-      return unless !!set_cookie_str && set_cookie_str.index('=')
-      cookie_hash = set_cookie_str.split(';').inject({}) do |acc, pair|
-        key, value = pair.strip.split('=')
-        acc[key] = value if key
+      cookie_hash = WEBrick::Cookie.parse_set_cookies(set_cookie_str).inject({}) do |hash, cookie|
+        hash[cookie.name] = cookie if !!cookie
+        hash
       end
-      super(cookie_hash)
+      @cookies.merge! cookie_hash
     end
 
     def to_s
-      self.map { |name, value| "#{name}=#{value}" }.join(';')
+      @cookies.values.reject { |cookie| cookie.expired? }.map { |cookie| "#{cookie.name}=#{cookie.value}" }.join(';')
     end
 
   end
