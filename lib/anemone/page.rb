@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'ostruct'
+require 'webrick/cookie'
 
 module Anemone
   class Page
@@ -90,6 +91,13 @@ module Anemone
     #
     def fetched?
       @fetched
+    end
+
+    #
+    # Array of cookies received with this page as WEBrick::Cookie objects.
+    #
+    def cookies
+      WEBrick::Cookie.parse_set_cookies(@headers['Set-Cookie']) rescue []
     end
 
     #

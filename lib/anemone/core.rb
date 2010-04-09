@@ -7,7 +7,7 @@ require 'anemone/storage'
 
 module Anemone
 
-  VERSION = '0.3.2';
+  VERSION = '0.4.0';
 
   #
   # Convenience method to start a crawl
@@ -41,7 +41,11 @@ module Anemone
       # number of times HTTP redirects will be followed
       :redirect_limit => 5,
       # storage engine defaults to Hash in +process_options+ if none specified
-      :storage => nil
+      :storage => nil,
+      # Hash of cookie name => value to send with HTTP requests
+      :cookies => nil,
+      # accept cookies from the server and send them back?
+      :accept_cookies => false
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -185,6 +189,18 @@ module Anemone
       @opts[:threads] = 1 if @opts[:delay] > 0
       @pages = PageStore.new(@opts[:storage] || Anemone::Storage.Hash)
       @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
+
+      freeze_options
+    end
+
+    #
+    # Freeze the opts Hash so that no options can be modified
+    # once the crawl begins
+    #
+    def freeze_options
+      @opts.freeze
+      @opts.each_key { |key| @opts[key].freeze }
+      @opts[:cookies].each_key { |key| @opts[:cookies][key].freeze } rescue nil
     end
 
     #

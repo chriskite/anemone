@@ -18,6 +18,7 @@ module Anemone
         http = Anemone::HTTP.new
         http.fetch_page(SPEC_DOMAIN).should be_an_instance_of(Page)
       end
+
     end
   end
 end
