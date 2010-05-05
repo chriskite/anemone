@@ -59,14 +59,13 @@ module Anemone
       @links = []
       return @links if !doc
 
-      doc.css('a').each do |a|
-        u = a.attributes['href'].content rescue nil
+      doc.search("//a[@href]").each do |a|
+        u = a['href']
         next if u.nil? or u.empty?
         abs = to_absolute(URI(u)) rescue next
         @links << abs if in_domain?(abs)
       end
-      @links.uniq!
-      @links
+      @links.uniq
     end
 
     #
