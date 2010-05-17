@@ -119,7 +119,7 @@ module Anemone
     # otherwise.
     #
     def redirect?
-      (300..399).include?(@code)
+      (300..307).include?(@code)
     end
 
     #
