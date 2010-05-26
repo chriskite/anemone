@@ -65,7 +65,8 @@ module Anemone
         abs = to_absolute(URI(u)) rescue next
         @links << abs if in_domain?(abs)
       end
-      @links.uniq
+      @links.uniq!
+      @links
     end
 
     #
