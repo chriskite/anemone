@@ -73,5 +73,11 @@ module Anemone
       @page.cookies.should == []
     end
 
+    it "should have a to_hash method that converts the page to a hash" do
+      hash = @page.to_hash
+      hash['url'].should == @page.url.to_s
+      hash['referer'].should == @page.referer.to_s
+    end
+
   end
 end

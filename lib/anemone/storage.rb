@@ -15,5 +15,10 @@ module Anemone
       self::TokyoCabinet.new(file)
     end
 
+    def self.MongoDB(mongo_collection)
+      require 'anemone/storage/mongodb'
+      self::MongoDB.new(mongo_collection)
+    end
+
   end
 end

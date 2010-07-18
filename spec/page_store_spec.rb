@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper'
-%w[pstore tokyo_cabinet].each { |file| require "anemone/storage/#{file}.rb" }
+%w[pstore tokyo_cabinet mongodb].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
   describe PageStore do
@@ -9,7 +9,7 @@ module Anemone
     end
 
     shared_examples_for "page storage" do
-      it "should be able to computer single-source shortest paths in-place" do
+      it "should be able to compute single-source shortest paths in-place" do
         pages = []
         pages << FakePage.new('0', :links => ['1', '3'])
         pages << FakePage.new('1', :redirect => '2')
@@ -121,6 +121,19 @@ module Anemone
 
       after(:all) do
         File.delete(@test_file) if File.exists?(@test_file)
+      end
+    end
+
+    describe Storage::MongoDB do
+      it_should_behave_like "page storage"
+
+      before(:each) do
+        collection = Mongo::Connection.new.db('test_db')['test_collection']
+        @opts = {:storage => @store = Storage.MongoDB(collection)}
+      end
+
+      after(:each) do
+        @store.close
       end
     end
 
