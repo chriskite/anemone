@@ -249,15 +249,22 @@ module Anemone
     # Returns +false+ otherwise.
     #
     def visit_link?(link, from_page = nil)
-      allowed = @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
-
       if from_page && @opts[:depth_limit]
         too_deep = from_page.depth >= @opts[:depth_limit]
       else
         too_deep = false
       end
 
-      !@pages.has_page?(link) && !skip_link?(link) && !skip_query_string?(link) && allowed && !too_deep
+      !@pages.has_page?(link) && !skip_link?(link) && !skip_query_string?(link) && allowed(link) && !too_deep
+    end
+
+    #
+    # Returns +true+ if we are obeying robots.txt and the link
+    # is granted access in it. Always returns +true+ when we are
+    # not obeying robots.txt.
+    #
+    def allowed(link)
+      @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
     end
     
     #

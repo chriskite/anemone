@@ -71,7 +71,7 @@ module Anemone
         core.should have(2).pages
         core.pages.keys.should_not include(pages[2].url)
       end
-      
+
       it "should be able to skip links with query strings" do
         pages = []
         pages << FakePage.new('0', :links => ['1?foo=1', '2'])
