@@ -249,13 +249,7 @@ module Anemone
     # Returns +false+ otherwise.
     #
     def visit_link?(link, from_page = nil)
-      if from_page && @opts[:depth_limit]
-        too_deep = from_page.depth >= @opts[:depth_limit]
-      else
-        too_deep = false
-      end
-
-      !@pages.has_page?(link) && !skip_link?(link) && !skip_query_string?(link) && allowed(link) && !too_deep
+      !@pages.has_page?(link) && !skip_link?(link) && !skip_query_string?(link) && allowed(link) && !too_deep(from_page)
     end
 
     #
@@ -265,6 +259,18 @@ module Anemone
     #
     def allowed(link)
       @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
+    end
+
+    #
+    # Returns +true+ if we are over the *too_deep* limit.
+    # This only works when coming from a page and with the +depth_limit+ option set.
+    # When neither is the case, will always return +false+.
+    def too_deep(from_page)
+      if from_page && @opts[:depth_limit]
+        from_page.depth >= @opts[:depth_limit]
+      else
+        false
+      end
     end
     
     #
