@@ -24,3 +24,11 @@ See the scripts under the <tt>lib/anemone/cli</tt> directory for examples of sev
 == Requirements
 * nokogiri
 * robots
+
+== Development
+To test and develop this gem, additional requirements are:
+* rspec
+* fakeweb
+* tokyocabinet
+
+The latter gem needs {Tokyo Cabinet}[http://fallabs.com/tokyocabinet/] installed on your system.
