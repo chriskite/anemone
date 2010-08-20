@@ -100,6 +100,14 @@ module Anemone
       @skip_link_patterns.concat [patterns].flatten.compact
       self
     end
+    
+    #
+    # Setting this skips all links with a query string (?param=value part).
+    #
+    def skip_query_string
+      @skip_query_string = true
+      self
+    end
 
     #
     # Add a block to be executed on every Page as they are encountered
@@ -249,7 +257,15 @@ module Anemone
         too_deep = false
       end
 
-      !@pages.has_page?(link) && !skip_link?(link) && allowed && !too_deep
+      !@pages.has_page?(link) && !skip_link?(link) && !skip_query_string?(link) && allowed && !too_deep
+    end
+    
+    #
+    # Returns +true+ if *link* should not be visited because
+    # it has a query string and +skip_query_string+ is set.
+    #
+    def skip_query_string?(link)
+      @skip_query_string && link.query
     end
 
     #
