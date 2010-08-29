@@ -2,8 +2,10 @@ require 'thread'
 require 'robots'
 require 'anemone/tentacle'
 require 'anemone/page'
+require 'anemone/exceptions'
 require 'anemone/page_store'
 require 'anemone/storage'
+require 'anemone/storage/base'
 
 module Anemone
 
@@ -187,7 +189,8 @@ module Anemone
     def process_options
       @opts = DEFAULT_OPTS.merge @opts
       @opts[:threads] = 1 if @opts[:delay] > 0
-      @pages = PageStore.new(@opts[:storage] || Anemone::Storage.Hash)
+      storage = Anemone::Storage::Base.new(@opts[:storage] || Anemone::Storage.Hash)
+      @pages = PageStore.new(storage)
       @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
 
       freeze_options

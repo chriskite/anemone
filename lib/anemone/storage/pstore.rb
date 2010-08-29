@@ -43,6 +43,8 @@ module Anemone
         self
       end
 
+      def close; end
+
     end
   end
 end
