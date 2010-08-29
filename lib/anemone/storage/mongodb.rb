@@ -9,30 +9,35 @@ module Anemone
   module Storage
     class MongoDB 
 
-      def initialize(mongo_collection)
-        @coll = mongo_collection
-        @coll.remove
-        @coll.create_index 'url'
+      def initialize(mongo_db, collection_name)
+        @db = mongo_db
+        @collection = @db[collection_name]
+        @collection.remove
+        @collection.create_index 'url'
       end
 
       def [](url)
-        if value = @coll.find_one('url' => url.to_s)
+        if value = @collection.find_one('url' => url.to_s)
           load_page(value)
         end
       end
 
       def []=(url, page)
-        @coll.update({'url' => page.url.to_s}, page.to_hash, :upsert => true)
+        @collection.update(
+          {'url' => page.url.to_s},
+          page.to_hash,
+          :upsert => true
+        )
       end
 
       def delete(url)
         page = self[url]
-        @coll.remove('url' => url.to_s)
+        @collection.remove('url' => url.to_s)
         page
       end
 
       def each
-        @coll.find do |cursor|
+        @collection.find do |cursor|
           cursor.each do |doc|
             page = load_page(doc)
             yield page.url.to_s, page 
@@ -46,7 +51,7 @@ module Anemone
       end
 
       def size
-        @coll.count
+        @collection.count
       end
 
       def keys
@@ -56,11 +61,11 @@ module Anemone
       end
 
       def has_key?(url)
-        !!@coll.find_one('url' => url.to_s)
+        !!@collection.find_one('url' => url.to_s)
       end
 
       def close
-        @coll.db.connection.close
+        @db.connection.close
       end
 
       private

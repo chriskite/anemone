@@ -192,9 +192,10 @@ module Anemone
        '@referer' => hash['referer'],
        '@redirect_to' => URI(hash['redirect_to']),
        '@response_time' => hash['response_time'].to_i,
-       '@fechted' => hash['fetched']}.each do |var, value|
+       '@fetched' => hash['fetched']
+      }.each do |var, value|
         page.instance_variable_set(var, value)
-       end
+      end
       page
     end
   end

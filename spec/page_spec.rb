@@ -6,7 +6,7 @@ module Anemone
     before(:each) do
       FakeWeb.clean_registry
       @http = Anemone::HTTP.new
-      @page = @http.fetch_page(FakePage.new('home').url)
+      @page = @http.fetch_page(FakePage.new('home', :links => '1').url)
     end
 
     it "should indicate whether it successfully fetched via HTTP" do
@@ -77,6 +77,15 @@ module Anemone
       hash = @page.to_hash
       hash['url'].should == @page.url.to_s
       hash['referer'].should == @page.referer.to_s
+      hash['links'].should == @page.links.map(&:to_s)
+    end
+
+    it "should have a from_hash method to convert from a hash to a Page" do
+      page = @page.dup
+      page.depth = 1
+      converted = Page.from_hash(page.to_hash)
+      converted.links.should == page.links
+      converted.depth.should == page.depth
     end
 
   end

@@ -128,8 +128,7 @@ module Anemone
       it_should_behave_like "page storage"
 
       before(:each) do
-        collection = Mongo::Connection.new.db('test_db')['test_collection']
-        @opts = {:storage => @store = Storage.MongoDB(collection)}
+        @opts = {:storage => @store = Storage.MongoDB}
       end
 
       after(:each) do

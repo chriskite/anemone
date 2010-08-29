@@ -24,9 +24,8 @@ module Anemone
     end
 
     it "should have a class method to produce a MongoDB" do
-      collection = Mongo::Connection.new.db('test_db')['test_collection']
       Anemone::Storage.should respond_to(:MongoDB)
-      store = Anemone::Storage.MongoDB(collection)
+      store = Anemone::Storage.MongoDB
       store.should be_an_instance_of(Anemone::Storage::MongoDB)
       store.close
     end
@@ -139,8 +138,7 @@ module Anemone
         it_should_behave_like "storage engine"
 
         before(:each) do
-          collection = Mongo::Connection.new.db('test_db')['test_collection']
-          @opts = {:storage => @store = Storage.MongoDB(collection)}
+          @opts = {:storage => @store = Storage.MongoDB}
         end
 
         after(:each) do
