@@ -9,6 +9,8 @@ module Anemone
   module Storage
     class MongoDB 
 
+      BINARY_FIELDS = %w(body headers data)
+
       def initialize(mongo_db, collection_name)
         @db = mongo_db
         @collection = @db[collection_name]
@@ -23,9 +25,13 @@ module Anemone
       end
 
       def []=(url, page)
+        hash = page.to_hash
+        BINARY_FIELDS.each do |field|
+          hash[field] = BSON::Binary.new(hash[field]) unless hash[field].nil?
+        end
         @collection.update(
           {'url' => page.url.to_s},
-          page.to_hash,
+          hash,
           :upsert => true
         )
       end
@@ -71,6 +77,9 @@ module Anemone
       private
 
       def load_page(hash)
+        BINARY_FIELDS.each do |field|
+          hash[field] = hash[field].to_s
+        end
         Page.from_hash(hash)
       end
 
