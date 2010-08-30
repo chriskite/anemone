@@ -25,5 +25,10 @@ module Anemone
       self::MongoDB.new(mongo_db, collection_name)
     end
 
+    def self.Redis(opts = {})
+      require 'anemone/storage/redis'
+      self::Redis.new(opts)
+    end
+
   end
 end

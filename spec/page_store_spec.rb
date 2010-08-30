@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper'
-%w[pstore tokyo_cabinet mongodb].each { |file| require "anemone/storage/#{file}.rb" }
+%w[pstore tokyo_cabinet mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
   describe PageStore do
@@ -129,6 +129,18 @@ module Anemone
 
       before(:each) do
         @opts = {:storage => @store = Storage.MongoDB}
+      end
+
+      after(:each) do
+        @store.close
+      end
+    end
+
+    describe Storage::Redis do
+      it_should_behave_like "page storage"
+
+      before(:each) do
+        @opts = {:storage => @store = Storage.Redis}
       end
 
       after(:each) do

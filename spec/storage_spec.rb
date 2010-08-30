@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper'
-%w[pstore tokyo_cabinet mongodb].each { |file| require "anemone/storage/#{file}.rb" }
+%w[pstore tokyo_cabinet mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
   describe Storage do
@@ -27,6 +27,13 @@ module Anemone
       Anemone::Storage.should respond_to(:MongoDB)
       store = Anemone::Storage.MongoDB
       store.should be_an_instance_of(Anemone::Storage::MongoDB)
+      store.close
+    end
+
+    it "should have a class method to produce a Redis" do
+      Anemone::Storage.should respond_to(:Redis)
+      store = Anemone::Storage.Redis
+      store.should be_an_instance_of(Anemone::Storage::Redis)
       store.close
     end
 
@@ -138,7 +145,19 @@ module Anemone
         it_should_behave_like "storage engine"
 
         before(:each) do
-          @opts = {:storage => @store = Storage.MongoDB}
+          @store = Storage.MongoDB
+        end
+
+        after(:each) do
+          @store.close
+        end
+      end
+
+      describe Storage::Redis do
+        it_should_behave_like "storage engine"
+
+        before(:each) do
+          @store = Storage.Redis
         end
 
         after(:each) do
