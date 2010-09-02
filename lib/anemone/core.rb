@@ -47,7 +47,9 @@ module Anemone
       # Hash of cookie name => value to send with HTTP requests
       :cookies => nil,
       # accept cookies from the server and send them back?
-      :accept_cookies => false
+      :accept_cookies => false,
+      # skip any link with a query string? e.g. http://foo.com/?u=user
+      :skip_query_strings => false
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -100,14 +102,6 @@ module Anemone
     #
     def skip_links_like(*patterns)
       @skip_link_patterns.concat [patterns].flatten.compact
-      self
-    end
-    
-    #
-    # Setting this skips all links with a query string (?param=value part).
-    #
-    def skip_query_string
-      @skip_query_string = true
       self
     end
 
@@ -253,10 +247,10 @@ module Anemone
     #
     def visit_link?(link, from_page = nil)
       !@pages.has_page?(link) &&
-        !skip_link?(link) &&
-        !skip_query_string?(link) &&
-        allowed(link) &&
-        !too_deep(from_page)
+      !skip_link?(link) &&
+      !skip_query_string?(link) &&
+      allowed(link) &&
+      !too_deep?(from_page)
     end
 
     #
@@ -269,10 +263,10 @@ module Anemone
     end
 
     #
-    # Returns +true+ if we are over the *too_deep* limit.
+    # Returns +true+ if we are over the page depth limit.
     # This only works when coming from a page and with the +depth_limit+ option set.
     # When neither is the case, will always return +false+.
-    def too_deep(from_page)
+    def too_deep?(from_page)
       if from_page && @opts[:depth_limit]
         from_page.depth >= @opts[:depth_limit]
       else
@@ -282,10 +276,10 @@ module Anemone
     
     #
     # Returns +true+ if *link* should not be visited because
-    # it has a query string and +skip_query_string+ is set.
+    # it has a query string and +skip_query_strings+ is true.
     #
     def skip_query_string?(link)
-      @skip_query_string && link.query
+      @opts[:skip_query_strings] && link.query
     end
 
     #

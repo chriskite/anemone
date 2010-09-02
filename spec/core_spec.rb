@@ -79,7 +79,7 @@ module Anemone
         pages << FakePage.new('2')
         
         core = Anemone.crawl(pages[0].url, @opts) do |a|
-          a.skip_query_string
+          a.skip_query_strings = true
         end
         
         core.should have(2).pages
