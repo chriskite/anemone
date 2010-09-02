@@ -1,3 +1,19 @@
+== 0.5.0 / 2010-09-01
+
+* Major enhancements
+
+  * Added page storage engines for MongoDB and Redis
+
+* Minor enhancements
+
+  * Use xpath for link parsing instead of CSS (faster) (Marc Seeger)
+  * Added skip_query_strings option to skip links with query strings (Joost Baaij)
+
+* Bug fixes
+
+  * Only consider status code 300..307 a redirect (Marc Seeger)
+  * Canonicalize redirect links (Marc Seeger)
+
 == 0.4.0 / 2010-04-08
 
 * Major enchancements

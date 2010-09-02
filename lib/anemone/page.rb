@@ -59,8 +59,8 @@ module Anemone
       @links = []
       return @links if !doc
 
-      doc.css('a').each do |a|
-        u = a.attributes['href'].content rescue nil
+      doc.search("//a[@href]").each do |a|
+        u = a['href']
         next if u.nil? or u.empty?
         abs = to_absolute(URI(u)) rescue next
         @links << abs if in_domain?(abs)
@@ -120,7 +120,7 @@ module Anemone
     # otherwise.
     #
     def redirect?
-      (300..399).include?(@code)
+      (300..307).include?(@code)
     end
 
     #
@@ -165,5 +165,38 @@ module Anemone
       @url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @redirect_to, @response_time, @fetched = ary
     end
 
+    def to_hash
+      {'url' => @url.to_s,
+       'headers' => Marshal.dump(@headers),
+       'data' => Marshal.dump(@data),
+       'body' => @body,
+       'links' => links.map(&:to_s), 
+       'code' => @code,
+       'visited' => @visited,
+       'depth' => @depth,
+       'referer' => @referer.to_s,
+       'redirect_to' => @redirect_to.to_s,
+       'response_time' => @response_time,
+       'fetched' => @fetched}
+    end
+
+    def self.from_hash(hash)
+      page = self.new(URI(hash['url']))
+      {'@headers' => Marshal.load(hash['headers']),
+       '@data' => Marshal.load(hash['data']),
+       '@body' => hash['body'],
+       '@links' => hash['links'].map { |link| URI(link) },
+       '@code' => hash['code'].to_i,
+       '@visited' => hash['visited'],
+       '@depth' => hash['depth'].to_i,
+       '@referer' => hash['referer'],
+       '@redirect_to' => URI(hash['redirect_to']),
+       '@response_time' => hash['response_time'].to_i,
+       '@fetched' => hash['fetched']
+      }.each do |var, value|
+        page.instance_variable_set(var, value)
+      end
+      page
+    end
   end
 end
