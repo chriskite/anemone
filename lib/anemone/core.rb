@@ -102,6 +102,14 @@ module Anemone
       @skip_link_patterns.concat [patterns].flatten.compact
       self
     end
+    
+    #
+    # Setting this skips all links with a query string (?param=value part).
+    #
+    def skip_query_string
+      @skip_query_string = true
+      self
+    end
 
     #
     # Add a block to be executed on every Page as they are encountered
@@ -244,15 +252,40 @@ module Anemone
     # Returns +false+ otherwise.
     #
     def visit_link?(link, from_page = nil)
-      allowed = @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
+      !@pages.has_page?(link) &&
+        !skip_link?(link) &&
+        !skip_query_string?(link) &&
+        allowed(link) &&
+        !too_deep(from_page)
+    end
 
+    #
+    # Returns +true+ if we are obeying robots.txt and the link
+    # is granted access in it. Always returns +true+ when we are
+    # not obeying robots.txt.
+    #
+    def allowed(link)
+      @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
+    end
+
+    #
+    # Returns +true+ if we are over the *too_deep* limit.
+    # This only works when coming from a page and with the +depth_limit+ option set.
+    # When neither is the case, will always return +false+.
+    def too_deep(from_page)
       if from_page && @opts[:depth_limit]
-        too_deep = from_page.depth >= @opts[:depth_limit]
+        from_page.depth >= @opts[:depth_limit]
       else
-        too_deep = false
+        false
       end
-
-      !@pages.has_page?(link) && !skip_link?(link) && allowed && !too_deep
+    end
+    
+    #
+    # Returns +true+ if *link* should not be visited because
+    # it has a query string and +skip_query_string+ is set.
+    #
+    def skip_query_string?(link)
+      @skip_query_string && link.query
     end
 
     #
