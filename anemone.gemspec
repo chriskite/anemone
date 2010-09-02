@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = "anemone"
-  s.version = "0.4.0"
+  s.version = "0.5.0"
   s.author = "Chris Kite"
   s.homepage = "http://anemone.rubyforge.org"
   s.rubyforge_project = "anemone"
@@ -15,37 +15,12 @@ spec = Gem::Specification.new do |s|
   s.add_dependency("robots", ">= 0.7.2")
 
   s.files = %w[
+    VERSION
     LICENSE.txt
     CHANGELOG.rdoc
     README.rdoc
-    bin/anemone
-    lib/anemone.rb
-    lib/anemone/cookie_store.rb
-    lib/anemone/core.rb
-    lib/anemone/http.rb
-    lib/anemone/page.rb
-    lib/anemone/page_store.rb
-    lib/anemone/tentacle.rb
-    lib/anemone/storage.rb
-    lib/anemone/storage/pstore.rb
-    lib/anemone/storage/tokyo_cabinet.rb
-    lib/anemone/cli.rb
-    lib/anemone/cli/url_list.rb
-    lib/anemone/cli/cron.rb
-    lib/anemone/cli/count.rb
-    lib/anemone/cli/pagedepth.rb
-    lib/anemone/cli/serialize.rb
-  ]
+    Rakefile
+  ] + Dir['lib/**/*.rb']
 
-  s.test_files = %w[
-    spec/anemone_spec.rb
-    spec/cookie_store_spec.rb
-    spec/core_spec.rb
-    spec/page_spec.rb
-    spec/page_store_spec.rb
-    spec/http_spec.rb
-    spec/storage_spec.rb
-    spec/fakeweb_helper.rb
-    spec/spec_helper.rb
-  ]
+  s.test_files = Dir['spec/*.rb']
 end
