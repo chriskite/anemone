@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper'
-%w[pstore tokyo_cabinet].each { |file| require "anemone/storage/#{file}.rb" }
+require_storage_engines 'pstore', 'tokyo_cabinet'
 
 module Anemone
   describe Core do
@@ -77,11 +77,11 @@ module Anemone
         pages << FakePage.new('0', :links => ['1?foo=1', '2'])
         pages << FakePage.new('1?foo=1')
         pages << FakePage.new('2')
-        
+
         core = Anemone.crawl(pages[0].url, @opts) do |a|
           a.skip_query_strings = true
         end
-        
+
         core.should have(2).pages
       end
 
@@ -131,7 +131,7 @@ module Anemone
         pages << FakePage.new('2')
 
         core = Anemone.crawl(pages[0].url, @opts) do |a|
-          a.focus_crawl {|p| p.links.reject{|l| l.to_s =~ /1/}}
+          a.focus_crawl { |p| p.links.reject { |l| l.to_s =~ /1/ } }
         end
 
         core.should have(2).pages
@@ -149,7 +149,7 @@ module Anemone
         Anemone.crawl(pages[0].url, @opts.merge({:delay => delay}))
         finish = Time.now
 
-        (finish - start).should satisfy {|t| t > delay * 2}
+        (finish - start).should satisfy { |t| t > delay * 2 }
       end
 
       it "should optionally obey the robots exclusion protocol" do
@@ -179,7 +179,7 @@ module Anemone
         core = Anemone.crawl(FakePage.new('0').url) do |anemone|
           anemone.threads = 4
           anemone.on_every_page do
-            lambda {anemone.threads = 2}.should raise_error
+            lambda { anemone.threads = 2 }.should raise_error
           end
         end
         core.opts[:threads].should == 4
@@ -230,46 +230,50 @@ module Anemone
       end
     end
 
-    describe Storage::PStore do
-      it_should_behave_like "crawl"
+    if testing? 'pstore'
+      describe Storage::PStore do
+        it_should_behave_like "crawl"
 
-      before(:each) do
-        @test_file = 'test.pstore'
-        File.delete(@test_file) if File.exists?(@test_file)
-        @opts = {:storage => Storage.PStore(@test_file)}
-      end
+        before(:each) do
+          @test_file = 'test.pstore'
+          File.delete(@test_file) if File.exists?(@test_file)
+          @opts = {:storage => Storage.PStore(@test_file)}
+        end
 
-      after(:all) do
-        File.delete(@test_file) if File.exists?(@test_file)
+        after(:all) do
+          File.delete(@test_file) if File.exists?(@test_file)
+        end
       end
     end
 
-    describe Storage::TokyoCabinet do
-      it_should_behave_like "crawl"
+    if testing? 'tokyocabinet'
+      describe Storage::TokyoCabinet do
+        it_should_behave_like "crawl"
 
-      before(:each) do
-        @test_file = 'test.tch'
-        File.delete(@test_file) if File.exists?(@test_file)
-        @opts = {:storage => @store = Storage.TokyoCabinet(@test_file)}
-      end
+        before(:each) do
+          @test_file = 'test.tch'
+          File.delete(@test_file) if File.exists?(@test_file)
+          @opts = {:storage => @store = Storage.TokyoCabinet(@test_file)}
+        end
 
-      after(:each) do
-        @store.close
-      end
+        after(:each) do
+          @store.close
+        end
 
-      after(:all) do
-        File.delete(@test_file) if File.exists?(@test_file)
+        after(:all) do
+          File.delete(@test_file) if File.exists?(@test_file)
+        end
       end
     end
 
     describe "options" do
       it "should accept options for the crawl" do
         core = Anemone.crawl(SPEC_DOMAIN, :verbose => false,
-                                          :threads => 2,
-                                          :discard_page_bodies => true,
-                                          :user_agent => 'test',
-                                          :obey_robots_txt => true,
-                                          :depth_limit => 3)
+                             :threads => 2,
+                             :discard_page_bodies => true,
+                             :user_agent => 'test',
+                             :obey_robots_txt => true,
+                             :depth_limit => 3)
 
         core.opts[:verbose].should == false
         core.opts[:threads].should == 2

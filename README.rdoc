@@ -33,4 +33,5 @@ To test and develop this gem, additional requirements are:
 * mongo
 * redis
 
-You will need to have {Tokyo Cabinet}[http://fallabs.com/tokyocabinet/], {MongoDB}[http://www.mongodb.org/], and {Redis}[http://code.google.com/p/redis/] installed on your system and running.
+You will need to have {Tokyo Cabinet}[http://fallabs.com/tokyocabinet/], {MongoDB}[http://www.mongodb.org/], and {Redis}[http://code.google.com/p/redis/] installed on your system and running if you intend to test these storage engines.
+You may add spec/testing_these_engines.rb and redefine $TESTING_STORAGE_ENGINES to specify which engines to test

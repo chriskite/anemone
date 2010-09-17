@@ -9,13 +9,8 @@ module Anemone
       end
 
       it "should still return a Page if an exception occurs during the HTTP connection" do
-        class HTTP
-          def refresh_connection
-            raise "test exception"
-          end
-        end
-
-        http = Anemone::HTTP.new
+        http = HTTP.new
+        http.should_receive(:refresh_connection).once.and_raise(RuntimeError)
         http.fetch_page(SPEC_DOMAIN).should be_an_instance_of(Page)
       end
 

@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper'
-%w[pstore tokyo_cabinet mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
+require_storage_engines $TESTABLE_STORAGE_ENGINES
 
 module Anemone
   describe PageStore do
@@ -92,59 +92,67 @@ module Anemone
       end
     end
 
-    describe Storage::PStore do
-      it_should_behave_like "page storage"
+    if testing? 'pstore'
+      describe Storage::PStore do
+        it_should_behave_like "page storage"
 
-      before(:each) do
-        @test_file = 'test.pstore'
-        File.delete(@test_file) if File.exists?(@test_file)
-        @opts = {:storage => Storage.PStore(@test_file)}
-      end
+        before(:each) do
+          @test_file = 'test.pstore'
+          File.delete(@test_file) if File.exists?(@test_file)
+          @opts = {:storage => Storage.PStore(@test_file)}
+        end
 
-      after(:all) do
-        File.delete(@test_file) if File.exists?(@test_file)
-      end
-    end
-
-    describe Storage::TokyoCabinet do
-      it_should_behave_like "page storage"
-
-      before(:each) do
-        @test_file = 'test.tch'
-        File.delete(@test_file) if File.exists?(@test_file)
-        @opts = {:storage => @store = Storage.TokyoCabinet(@test_file)}
-      end
-
-      after(:each) do
-        @store.close
-      end
-
-      after(:all) do
-        File.delete(@test_file) if File.exists?(@test_file)
+        after(:all) do
+          File.delete(@test_file) if File.exists?(@test_file)
+        end
       end
     end
 
-    describe Storage::MongoDB do
-      it_should_behave_like "page storage"
+    if testing? 'tokyo_cabinet'
+      describe Storage::TokyoCabinet do
+        it_should_behave_like "page storage"
 
-      before(:each) do
-        @opts = {:storage => @store = Storage.MongoDB}
-      end
+        before(:each) do
+          @test_file = 'test.tch'
+          File.delete(@test_file) if File.exists?(@test_file)
+          @opts = {:storage => @store = Storage.TokyoCabinet(@test_file)}
+        end
 
-      after(:each) do
-        @store.close
+        after(:each) do
+          @store.close
+        end
+
+        after(:all) do
+          File.delete(@test_file) if File.exists?(@test_file)
+        end
       end
     end
 
-    describe Storage::Redis do
-      it_should_behave_like "page storage"
+    if testing? 'mongodb'
+      describe Storage::MongoDB do
+        it_should_behave_like "page storage"
 
-      before(:each) do
-        @opts = {:storage => @store = Storage.Redis}
+        before(:each) do
+          @opts = {:storage => @store = Storage.MongoDB}
+        end
+
+        after(:each) do
+          @store.close
+        end
       end
+    end
 
-      after(:each) do
-        @store.close
+    if testing? 'redis'
+      describe Storage::Redis do
+        it_should_behave_like "page storage"
+
+        before(:each) do
+          @opts = {:storage => @store = Storage.Redis}
+        end
+
+        after(:each) do
+          @store.close
+        end
       end
     end
 
