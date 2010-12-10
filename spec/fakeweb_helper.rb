@@ -9,6 +9,7 @@ FakeWeb.allow_net_connect = false
 
 module Anemone
   SPEC_DOMAIN = "http://www.example.com/"
+  AUTH_SPEC_DOMAIN = "http://user:pass@#{URI.parse(SPEC_DOMAIN).host}/"
 
   class FakePage
     attr_accessor :links
@@ -20,6 +21,7 @@ module Anemone
       @links = [options[:links]].flatten if options.has_key?(:links)
       @hrefs = [options[:hrefs]].flatten if options.has_key?(:hrefs)
       @redirect = options[:redirect] if options.has_key?(:redirect)
+      @auth = options[:auth] if options.has_key?(:auth)
       @content_type = options[:content_type] || "text/html"
       @body = options[:body]
 
@@ -29,6 +31,10 @@ module Anemone
 
     def url
       SPEC_DOMAIN + @name
+    end
+
+    def auth_url
+      AUTH_SPEC_DOMAIN + @name
     end
 
     private
@@ -56,7 +62,15 @@ module Anemone
                                                   :status => [200, "OK"]})
       end
 
-      FakeWeb.register_uri(:get, SPEC_DOMAIN + @name, options)
+      if @auth
+        unautorized_options = {
+          :body => "Unauthorized", :status => ["401", "Unauthorized"]
+        }
+        FakeWeb.register_uri(:get, SPEC_DOMAIN + @name, unautorized_options)
+        FakeWeb.register_uri(:get, AUTH_SPEC_DOMAIN + @name, options)
+      else
+        FakeWeb.register_uri(:get, SPEC_DOMAIN + @name, options)
+      end
     end
   end
 end

@@ -50,6 +50,14 @@ module Anemone
         Anemone.crawl(pages[0].url, @opts).should have(3).pages
       end
 
+      it "should follow with HTTP basic authentication" do
+        pages = []
+        pages << FakePage.new('0', :links => ['1', '2'], :auth => true)
+        pages << FakePage.new('1', :links => ['3'], :auth => true)
+
+        Anemone.crawl(pages.first.auth_url, @opts).should have(3).pages
+      end
+
       it "should accept multiple starting URLs" do
         pages = []
         pages << FakePage.new('0', :links => ['1'])

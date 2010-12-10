@@ -111,7 +111,11 @@ module Anemone
       retries = 0
       begin
         start = Time.now()
-        response = connection(url).get(full_path, opts)
+        # format request
+        req = Net::HTTP::Get.new(full_path, opts)
+        # HTTP Basic authentication
+        req.basic_auth url.user, url.password if url.user
+        response = connection(url).request(req)
         finish = Time.now()
         response_time = ((finish - start) * 1000).round
         @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?
