@@ -239,7 +239,7 @@ module Anemone
         @opts = {:storage => Storage.PStore(@test_file)}
       end
 
-      after(:all) do
+      after(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
       end
     end
@@ -257,7 +257,7 @@ module Anemone
         @store.close
       end
 
-      after(:all) do
+      after(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
       end
     end
