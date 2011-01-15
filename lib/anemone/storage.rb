@@ -13,16 +13,16 @@ module Anemone
       self::PStore.new(*args)
     end
 
-    def self.TokyoCabinet(file = 'anemone.tch')
+    def self.TokyoCabinet(file = 'anemone.tch', remove_existing = false)
       require 'anemone/storage/tokyo_cabinet'
-      self::TokyoCabinet.new(file)
+      self::TokyoCabinet.new(file, remove_existing)
     end
 
-    def self.MongoDB(mongo_db = nil, collection_name = 'pages')
+    def self.MongoDB(mongo_db = nil, collection_name = 'pages', remove_existing = false)
       require 'anemone/storage/mongodb'
       mongo_db ||= Mongo::Connection.new.db('anemone')
       raise "First argument must be an instance of Mongo::DB" unless mongo_db.is_a?(Mongo::DB)
-      self::MongoDB.new(mongo_db, collection_name)
+      self::MongoDB.new(mongo_db, collection_name, remove_existing)
     end
 
     def self.Redis(opts = {})

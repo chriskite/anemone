@@ -14,10 +14,14 @@ module Anemone
 
       def_delegators :@db, :close, :size, :keys, :has_key?
 
-      def initialize(file)
+      def initialize(file, remove_existing = false)
         raise "TokyoCabinet filename must have .tch extension" if File.extname(file) != '.tch'
         @db = ::TokyoCabinet::HDB::new
-        @db.open(file, ::TokyoCabinet::HDB::OWRITER | ::TokyoCabinet::HDB::OCREAT)
+        if remove_existing 
+          @db.open(file, ::TokyoCabinet::HDB::OWRITER | ::TokyoCabinet::HDB::OTRUNC)
+        else
+          @db.open(file, ::TokyoCabinet::HDB::OWRITER | ::TokyoCabinet::HDB::OCREAT)
+        end
         @db.clear
       end
 

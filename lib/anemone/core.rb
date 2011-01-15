@@ -10,7 +10,7 @@ require 'anemone/storage/base'
 module Anemone
 
   VERSION = '0.5.0';
-
+  
   #
   # Convenience method to start a crawl
   #
@@ -24,6 +24,7 @@ module Anemone
     attr_reader :pages
     # Hash of options for the crawl
     attr_reader :opts
+    
 
     DEFAULT_OPTS = {
       # run 4 Tentacle threads to fetch pages
@@ -58,12 +59,13 @@ module Anemone
         @opts[key.to_sym] = value
       end
     end
-
+    
     #
     # Initialize the crawl with starting *urls* (single URL or Array of URLs)
     # and optional *block*
     #
     def initialize(urls, opts = {})
+      
       @urls = [urls].flatten.map{ |url| url.is_a?(URI) ? url : URI(url) }
       @urls.each{ |url| url.path = '/' if url.path.empty? }
 
@@ -71,6 +73,7 @@ module Anemone
       @on_every_page_blocks = []
       @on_pages_like_blocks = Hash.new { |hash,key| hash[key] = [] }
       @skip_link_patterns = []
+      @skip_query_patterns = []
       @after_crawl_blocks = []
       @opts = opts
 
@@ -81,6 +84,7 @@ module Anemone
     # Convenience method to start a new crawl
     #
     def self.crawl(urls, opts = {})
+      
       self.new(urls, opts) do |core|
         yield core if block_given?
         core.run
@@ -102,6 +106,15 @@ module Anemone
     #
     def skip_links_like(*patterns)
       @skip_link_patterns.concat [patterns].flatten.compact
+      self
+    end
+
+    #
+    # Add one ore more Regex patterns for URLs which should not be
+    # followed
+    #
+    def skip_query_string_like(*patterns)
+      @skip_query_patterns.concat [patterns].flatten.compact
       self
     end
 
@@ -153,7 +166,6 @@ module Anemone
       end
 
       @urls.each{ |url| link_queue.enq(url) }
-
       loop do
         page = page_queue.deq
         @pages.touch_key page.url
@@ -183,6 +195,7 @@ module Anemone
 
       @tentacles.each { |thread| thread.join }
       do_after_crawl_blocks
+
       self
     end
 
@@ -287,7 +300,12 @@ module Anemone
     # its URL matches a skip_link pattern.
     #
     def skip_link?(link)
-      @skip_link_patterns.any? { |pattern| link.path =~ pattern }
+      if ( link.query.nil? )
+        @skip_link_patterns.any? { |pattern| link.path =~ pattern }
+      else
+        @skip_link_patterns.any? { |pattern| link.path =~ pattern } ||
+        @skip_query_patterns.any? { |pattern| link.query =~ pattern }
+      end
     end
 
   end

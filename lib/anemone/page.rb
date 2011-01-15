@@ -47,8 +47,10 @@ module Anemone
       @response_time = params[:response_time]
       @body = params[:body]
       @error = params[:error]
-
+        
       @fetched = !params[:code].nil?
+
+    
     end
 
     #
@@ -167,8 +169,8 @@ module Anemone
 
     def to_hash
       {'url' => @url.to_s,
-       'headers' => Marshal.dump(@headers),
-       'data' => Marshal.dump(@data),
+       'headers' => self.to_hash_struct(@headers),
+       'data' => self.to_hash_struct(@data),
        'body' => @body,
        'links' => links.map(&:to_s), 
        'code' => @code,
@@ -182,8 +184,8 @@ module Anemone
 
     def self.from_hash(hash)
       page = self.new(URI(hash['url']))
-      {'@headers' => Marshal.load(hash['headers']),
-       '@data' => Marshal.load(hash['data']),
+      {'@headers' => page.from_hash_struct(hash['headers']),
+       '@data' => page.from_hash_struct(hash['data']),
        '@body' => hash['body'],
        '@links' => hash['links'].map { |link| URI(link) },
        '@code' => hash['code'].to_i,
@@ -198,5 +200,14 @@ module Anemone
       end
       page
     end
+    
+    def from_hash_struct(data)
+      Marshal.load(data)
+    end
+    
+    def to_hash_struct(data)
+      Marshal.dump(data)
+    end
+    
   end
 end
