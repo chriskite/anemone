@@ -169,8 +169,8 @@ module Anemone
 
     def to_hash
       {'url' => @url.to_s,
-       'headers' => self.to_hash_struct(@headers),
-       'data' => self.to_hash_struct(@data),
+       'headers' => Marshal.dump(@headers),
+       'data' => Marshal.dump(@data),
        'body' => @body,
        'links' => links.map(&:to_s), 
        'code' => @code,
@@ -184,8 +184,8 @@ module Anemone
 
     def self.from_hash(hash)
       page = self.new(URI(hash['url']))
-      {'@headers' => page.from_hash_struct(hash['headers']),
-       '@data' => page.from_hash_struct(hash['data']),
+      {'@headers' => Marshal.load(hash['headers']),
+       '@data' => Marshal.load(hash['data']),
        '@body' => hash['body'],
        '@links' => hash['links'].map { |link| URI(link) },
        '@code' => hash['code'].to_i,
@@ -199,14 +199,6 @@ module Anemone
         page.instance_variable_set(var, value)
       end
       page
-    end
-    
-    def from_hash_struct(data)
-      Marshal.load(data)
-    end
-    
-    def to_hash_struct(data)
-      Marshal.dump(data)
     end
     
   end
