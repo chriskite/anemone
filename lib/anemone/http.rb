@@ -135,6 +135,10 @@ module Anemone
 
     def refresh_connection(url)
       http = Net::HTTP.new(url.host, url.port)
+      if @opts[:read_timeout] then
+        http.read_timeout = @opts[:read_timeout]
+      end
+      
       if url.scheme == 'https'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
