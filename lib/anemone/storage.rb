@@ -4,7 +4,7 @@ module Anemone
     def self.Hash(*args)
       hash = Hash.new(*args)
       # add close method for compatibility with Storage::Base
-      class << hash; def close; end; end
+      class << hash; def close; end; def non_fetched_urls; end; end
       hash
     end
 
