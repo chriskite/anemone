@@ -155,6 +155,10 @@ module Anemone
         return links
       end
     end
+    
+    def non_fetched_urls(limit = 10)
+      @storage.non_fetched_urls(limit)
+    end
 
   end
 end

@@ -69,6 +69,19 @@ module Anemone
         @redis.quit
       end
 
+      def non_fetched_urls(limit = 10)
+        urls = []
+        rkeys = @redis.keys("#{@key_prefix}:pages:*")
+        rkeys.each do |rkey|
+          hash = @redis.hgetall(rkey)
+          if hash['fetched'] == false then
+            urls.push URI(hash['url'])              
+            break if urls.count == limit 
+          end
+        end          
+        urls
+      end
+
       private
 
       def load_value(hash)

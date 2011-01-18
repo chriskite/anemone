@@ -69,6 +69,10 @@ module Anemone
         rescue
           raise GenericError, $!
       end
+  
+      def non_fetched_urls(limit = 10)
+        @adap.non_fetched_urls(limit)
+      end
 
     end
   end

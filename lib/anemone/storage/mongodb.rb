@@ -72,6 +72,17 @@ module Anemone
         !!@collection.find_one('url' => url.to_s)
       end
 
+      def non_fetched_urls(limit = 10)
+        urls = []
+        @collection.find({'fetched' => false}, {:fields => 'url', :limit => limit}) do |cursor|
+          cursor.each do |doc|
+            urls.push URI(doc['url'])
+          end
+        end
+
+        urls   
+      end
+
       def close
         @db.connection.close
       end
@@ -84,7 +95,6 @@ module Anemone
         end
         Page.from_hash(hash)
       end
-
     end
   end
 end

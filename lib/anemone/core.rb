@@ -50,7 +50,9 @@ module Anemone
       # accept cookies from the server and send them back?
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
-      :skip_query_strings => false
+      :skip_query_strings => false,
+      # find a non-fetched link from the data store and visit it
+      :resume => false
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -66,9 +68,13 @@ module Anemone
     #
     def initialize(urls, opts = {})
       
-      @urls = [urls].flatten.map{ |url| url.is_a?(URI) ? url : URI(url) }
-      @urls.each{ |url| url.path = '/' if url.path.empty? }
-
+      if !urls.empty? then
+        @urls = [urls].flatten.map{ |url| url.is_a?(URI) ? url : URI(url) }
+        @urls.each{ |url| url.path = '/' if url.path.empty? }
+      else
+        @urls = []
+      end
+        
       @tentacles = []
       @on_every_page_blocks = []
       @on_pages_like_blocks = Hash.new { |hash,key| hash[key] = [] }
@@ -156,6 +162,11 @@ module Anemone
       process_options
 
       @urls.delete_if { |url| !visit_link?(url) }
+
+      if @urls.empty? && @opts[:resume] then
+        @urls = @pages.non_fetched_urls(10)
+      end
+
       return if @urls.empty?
 
       link_queue = Queue.new

@@ -50,6 +50,10 @@ module Anemone
         self
       end
 
+      def non_fetched_urls(limit = 10)
+        raise GenericError, $!
+      end
+
       private
 
       def load_value(value)
