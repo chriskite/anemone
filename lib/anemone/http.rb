@@ -116,7 +116,7 @@ module Anemone
         response_time = ((finish - start) * 1000).round
         @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?
         return response, response_time
-      rescue EOFError
+      rescue EOFError, Timeout::Error
         refresh_connection(url)
         retries += 1
         retry unless retries > 3
