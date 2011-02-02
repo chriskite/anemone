@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/spec_helper'
+$:.unshift(File.dirname(__FILE__))
+require 'spec_helper'
 
 module Anemone
   describe CookieStore do

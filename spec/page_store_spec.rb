@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/spec_helper'
+$:.unshift(File.dirname(__FILE__))
+require 'spec_helper'
 %w[pstore tokyo_cabinet mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
@@ -101,7 +102,7 @@ module Anemone
         @opts = {:storage => Storage.PStore(@test_file)}
       end
 
-      after(:all) do
+      after(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
       end
     end
@@ -119,7 +120,7 @@ module Anemone
         @store.close
       end
 
-      after(:all) do
+      after(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
       end
     end

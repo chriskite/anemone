@@ -1,4 +1,6 @@
-require File.dirname(__FILE__) + '/spec_helper'
+$:.unshift(File.dirname(__FILE__))
+require 'spec_helper'
+
 %w[pstore tokyo_cabinet mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
