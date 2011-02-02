@@ -233,8 +233,11 @@ module Anemone
     describe Storage::PStore do
       it_should_behave_like "crawl"
 
-      before(:each) do
+      before(:all) do
         @test_file = 'test.pstore'
+      end
+
+      before(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
         @opts = {:storage => Storage.PStore(@test_file)}
       end
@@ -247,8 +250,11 @@ module Anemone
     describe Storage::TokyoCabinet do
       it_should_behave_like "crawl"
 
-      before(:each) do
+      before(:all) do
         @test_file = 'test.tch'
+      end
+
+      before(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
         @opts = {:storage => @store = Storage.TokyoCabinet(@test_file)}
       end
