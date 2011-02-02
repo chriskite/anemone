@@ -139,7 +139,7 @@ module Anemone
       return nil if link.nil?
 
       # remove anchor
-      link = URI.encode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,''))
+      link = URI.encode(URI.decode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,'')))
 
       relative = URI(link)
       absolute = @url.merge(relative)
