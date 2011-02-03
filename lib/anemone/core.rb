@@ -260,6 +260,8 @@ module Anemone
     #
     def allowed(link)
       @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
+    rescue
+      false
     end
 
     #
