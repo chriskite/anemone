@@ -49,7 +49,11 @@ module Anemone
       # accept cookies from the server and send them back?
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
-      :skip_query_strings => false
+      :skip_query_strings => false,
+      # proxy address
+      :proxy_address => nil,
+      # proxy port
+      :proxy_port => false
     }
 
     # Create setter methods for all options to be called from the crawl block

@@ -74,6 +74,20 @@ module Anemone
       @opts[:accept_cookies]
     end
 
+    #
+    # The proxy address string
+    #
+    def proxy_address
+      @opts[:proxy_address]
+    end
+
+    #
+    # The proxy port
+    #
+    def proxy_port
+      @opts[:proxy_port]
+    end
+
     private
 
     #
@@ -134,12 +148,12 @@ module Anemone
     end
 
     def refresh_connection(url)
-      http = Net::HTTP.new(url.host, url.port)
+      http = Net::HTTP::Proxy(proxy_address, proxy_port)
       if url.scheme == 'https'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
-      @connections[url.host][url.port] = http.start
+      @connections[url.host][url.port] = http.start(url.host, url.port)
     end
 
     def verbose?
