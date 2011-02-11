@@ -88,5 +88,12 @@ module Anemone
       converted.depth.should == page.depth
     end
 
+    it "should convert to absolute and retain encoded URIs" do
+      page = Page.new(URI(SPEC_DOMAIN))
+      encoded_path = URI.encode('path with space')
+      absolute = page.to_absolute(encoded_path)
+      absolute.to_s.should == "#{SPEC_DOMAIN}#{encoded_path}"
+    end
+
   end
 end
