@@ -38,7 +38,9 @@ module Anemone
       end
 
       def each
-        @db.each { |k, v| yield k, load_value(v) }
+        @db.keys.each do |k|
+          yield(k, self[k])
+        end
       end
 
       def merge!(hash)

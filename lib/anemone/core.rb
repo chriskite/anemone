@@ -9,7 +9,7 @@ require 'anemone/storage/base'
 
 module Anemone
 
-  VERSION = '0.5.0';
+  VERSION = '0.6.0';
 
   #
   # Convenience method to start a crawl
@@ -49,7 +49,13 @@ module Anemone
       # accept cookies from the server and send them back?
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
-      :skip_query_strings => false
+      :skip_query_strings => false,
+      # proxy server hostname 
+      :proxy_host => nil,
+      # proxy server port number
+      :proxy_port => false,
+      # HTTP read timeout in seconds
+      :read_timeout => nil
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -260,6 +266,8 @@ module Anemone
     #
     def allowed(link)
       @opts[:obey_robots_txt] ? @robots.allowed?(link) : true
+    rescue
+      false
     end
 
     #

@@ -1,3 +1,19 @@
+== 0.6.0 / 2011-02-17
+
+* Major enhancements
+
+    * Added support for HTTP Basic Auth with URLs containing a username and password
+    * Added support for anonymous HTTP proxies
+
+* Minor enhancements
+
+    * Added read_timeout option to set the HTTP request timeout in seconds
+
+* Bug fixes
+
+    * Don't fatal error if a page request times out
+    * Fix double encoding of links containing %20
+
 == 0.5.0 / 2010-09-01
 
 * Major enhancements
