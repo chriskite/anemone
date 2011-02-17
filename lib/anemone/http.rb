@@ -77,8 +77,8 @@ module Anemone
     #
     # The proxy address string
     #
-    def proxy_address
-      @opts[:proxy_address]
+    def proxy_host
+      @opts[:proxy_host]
     end
 
     #
@@ -153,7 +153,7 @@ module Anemone
     end
 
     def refresh_connection(url)
-      http = Net::HTTP::Proxy(proxy_address, proxy_port)
+      http = Net::HTTP::Proxy(proxy_host, proxy_port)
       if url.scheme == 'https'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE

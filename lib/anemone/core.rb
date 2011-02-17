@@ -50,9 +50,9 @@ module Anemone
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
       :skip_query_strings => false,
-      # proxy address
-      :proxy_address => nil,
-      # proxy port
+      # proxy server hostname 
+      :proxy_host => nil,
+      # proxy server port number
       :proxy_port => false
     }
 
