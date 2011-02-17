@@ -88,6 +88,13 @@ module Anemone
       @opts[:proxy_port]
     end
 
+    #
+    # HTTP read timeout in seconds
+    #
+    def read_timeout
+      @opts[:read_timeout]
+    end
+
     private
 
     #
@@ -154,6 +161,9 @@ module Anemone
 
     def refresh_connection(url)
       http = Net::HTTP::Proxy(proxy_host, proxy_port)
+
+      http.read_timeout = read_timeout if !!read_timeout
+
       if url.scheme == 'https'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE

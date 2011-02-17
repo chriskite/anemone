@@ -9,7 +9,7 @@ require 'anemone/storage/base'
 
 module Anemone
 
-  VERSION = '0.5.0';
+  VERSION = '0.6.0';
 
   #
   # Convenience method to start a crawl
@@ -53,7 +53,9 @@ module Anemone
       # proxy server hostname 
       :proxy_host => nil,
       # proxy server port number
-      :proxy_port => false
+      :proxy_port => false,
+      # HTTP read timeout in seconds
+      :read_timeout => nil
     }
 
     # Create setter methods for all options to be called from the crawl block
