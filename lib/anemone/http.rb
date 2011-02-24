@@ -160,7 +160,7 @@ module Anemone
     end
 
     def refresh_connection(url)
-      http = Net::HTTP::Proxy(proxy_host, proxy_port)
+      http = Net::HTTP.new(url.host, url.port, proxy_host, proxy_port)
 
       http.read_timeout = read_timeout if !!read_timeout
 
@@ -168,7 +168,8 @@ module Anemone
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
-      @connections[url.host][url.port] = http.start(url.host, url.port)
+
+      @connections[url.host][url.port] = http.start 
     end
 
     def verbose?
