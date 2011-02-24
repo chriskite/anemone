@@ -1,3 +1,9 @@
+== 0.6.1 / 2011-02-24
+
+*Bug fixes
+
+  * Fix a bug preventing SSL connections from working
+
 == 0.6.0 / 2011-02-17
 
 * Major enhancements
