@@ -1,6 +1,6 @@
 $:.unshift(File.dirname(__FILE__))
 require 'spec_helper'
-%w[pstore tokyo_cabinet].each { |file| require "anemone/storage/#{file}.rb" }
+%w[pstore tokyo_cabinet sqlite3].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
   describe Core do
@@ -266,6 +266,27 @@ module Anemone
       before(:each) do
         File.delete(@test_file) if File.exists?(@test_file)
         @opts = {:storage => @store = Storage.TokyoCabinet(@test_file)}
+      end
+
+      after(:each) do
+        @store.close
+      end
+
+      after(:each) do
+        File.delete(@test_file) if File.exists?(@test_file)
+      end
+    end
+
+    describe Storage::SQLite3 do
+      it_should_behave_like "crawl"
+
+      before(:all) do
+        @test_file = 'test.db'
+      end
+
+      before(:each) do
+        File.delete(@test_file) if File.exists?(@test_file)
+        @opts = {:storage => @store = Storage.SQLite3(@test_file)}
       end
 
       after(:each) do
