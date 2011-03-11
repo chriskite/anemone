@@ -1,7 +1,7 @@
 begin
   require 'sqlite3'
 rescue LoadError
-  puts "You need the sqlite3 gem to use Anemone::Storage::Sqlite"
+  puts "You need the sqlite3 gem to use Anemone::Storage::SQLite3"
   exit
 end
 
