@@ -1,7 +1,7 @@
 $:.unshift(File.dirname(__FILE__))
 require 'spec_helper'
 
-%w[pstore tokyo_cabinet mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
+%w[pstore tokyo_cabinet mongodb redis sqlite3].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
   describe Storage do
@@ -36,6 +36,13 @@ module Anemone
       Anemone::Storage.should respond_to(:Redis)
       store = Anemone::Storage.Redis
       store.should be_an_instance_of(Anemone::Storage::Redis)
+      store.close
+    end
+
+    it "should have a class method to produce a SQLite3" do
+      Anemone::Storage.should respond_to(:SQLite3)
+      store = Anemone::Storage.SQLite3
+      store.should be_an_instance_of(Anemone::Storage::SQLite3)
       store.close
     end
 
@@ -164,6 +171,19 @@ module Anemone
 
         after(:each) do
           @store.close
+        end
+      end
+
+      describe Storage::SQLite3 do
+        it_should_behave_like "storage engine"
+
+        before(:each) do
+          @store = Storage.SQLite3(:db => "spec.db")
+        end
+
+        after(:each) do
+          @store.close
+          File.unlink("spec.db")
         end
       end
 
