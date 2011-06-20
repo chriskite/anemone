@@ -132,6 +132,14 @@ module Anemone
     end
 
     #
+    # Returns +true+ if the page cause server error (returned 500 code),
+    # returns +false+ otherwise.
+    #
+    def server_error?
+      500 == @code
+    end
+
+    #
     # Converts relative URL *link* into an absolute URL based on the
     # location of the page
     #
