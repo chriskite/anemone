@@ -89,5 +89,11 @@ module Anemone
       converted.depth.should == page.depth
     end
 
+    it 'should handle a from_hash with a nil redirect_to' do
+      page_hash = @page.to_hash
+      page_hash['redirect_to'] = nil
+      lambda{Page.from_hash(page_hash)}.should_not raise_error(URI::InvalidURIError)
+    end
+
   end
 end
