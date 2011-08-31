@@ -175,6 +175,15 @@ module Anemone
 
         @pages[page.url] = page
 
+		# if link_queue grows faster than threads can consume them
+		# pass until threads consumed enough links.
+		# Fixes OutOfMemory error when crawling large sites
+		# TEMPORARY FIX. (Is there a better solution?)
+		until link_queue.length < @opts[:threads]*10
+          Thread.pass
+          sleep 1.0
+        end
+		
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?
           until link_queue.num_waiting == @tentacles.size
