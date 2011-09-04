@@ -1,5 +1,4 @@
 require 'thread'
-require 'monitor'
 require 'robots'
 require 'anemone/tentacle'
 require 'anemone/page'
