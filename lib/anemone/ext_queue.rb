@@ -3,21 +3,36 @@ require "yaml"
 require 'thread'
 
 class ExtQueue
+
+  #
+  # Create new Queue with on-demand external memory storage.
+  # Requires read-write access to working directory.
+  #
+  # The class is not preserving the order of elements
+  # as would be expected for a Queue.
+  #
+  # TODO: Modify this class to check for actual memory consumption rather than element count
+  #
+
   def initialize(max_elem_in_memory, prefix)
     @data = []
-    @data.taint
     @waiting=[]
-    @waiting.taint
 
     @q_max = 0
     @q_min = 0
-    @lock = Mutex.new
-    @max_elem = max_elem_in_memory
-    @partial = 2;
-    @num = (@max_elem / @partial).ceil
-    @prefix = prefix
-    self.taint
 
+    @lock = Mutex.new
+
+    @max_elem = max_elem_in_memory
+    @swap_fraction = 0.5;  # fraction of data to write to disk when exceeding the queue limit
+    @num = (@max_elem * @swap_fraction).ceil
+
+    # filename prefix for the storage
+    @prefix = prefix
+
+    @data.taint
+    @waiting.taint
+    self.taint
   end
 
 

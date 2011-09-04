@@ -58,7 +58,7 @@ module Anemone
       :proxy_port => false,
       # HTTP read timeout in seconds
       :read_timeout => nil,
-      # disable support for larg-scale crawls
+      # disable support for larg-scale crawls. Activate if you run out of memory during crawls.
       :large_scale_crawl => false
     }
 
@@ -161,10 +161,6 @@ module Anemone
       @urls.each{ |url| link_queue.enq([url]) }
 
       @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts,1).run; }
-
-      until !page_queue.empty?
-        Thread.pass
-      end
 
       loop do
         page = page_queue.deq
