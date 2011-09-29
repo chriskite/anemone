@@ -11,11 +11,39 @@ module Anemone
 
   VERSION = '0.6.1';
 
+  attr_accessor :caught_pipes  
+
   #
   # Convenience method to start a crawl
   #
+
+  def Anemone.too_much_pipe?
+    ## puts "Quit hittin' the pipe, brah..."
+    ## The pipe explosion limit will be arbitrary...at least in C, a SIGPIPE would DESTROY any thread/process, but ruby seems a bit different
+    pipe_limit = 20
+    pipe_limit
+  end  
+
   def Anemone.crawl(urls, options = {}, &block)
     Core.crawl(urls, options, &block)
+  end
+
+  def Anemone.caught_pipes
+    if @caught_pipes.nil?
+      @caught_pipes = 0
+    end
+    @caught_pipes
+  end
+
+  def Anemone.increment_pipes
+    if @caught_pipes.nil?
+      @caught_pipes = 0
+    end
+    @caught_pipes += 1
+  end
+  
+  def Anemone.tare_pipes
+    @caught_pipes = 0
   end
 
   class Core
@@ -146,6 +174,7 @@ module Anemone
     # Perform the crawl
     #
     def run
+      Anemone.tare_pipes
       process_options
 
       @urls.delete_if { |url| !visit_link?(url) }
@@ -154,16 +183,35 @@ module Anemone
       link_queue = Queue.new
       page_queue = Queue.new
 
+      @urls.each{ |url| link_queue.enq(url) }
+
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
       end
-
-      @urls.each{ |url| link_queue.enq(url) }
-
+      
       loop do
-        page = page_queue.deq
+        if @tentacles.size < 1
+	  puts "No way...no more tentacles are alive! Exiting violently..." if verbose?
+	  @tentacles.each{|tentacle| tentacle.kill}
+	  break
+	end
+	if Anemone.caught_pipes  >= Anemone.too_much_pipe?
+	  puts "We caught #{Anemone.caught_pipes} pipes and there are #{@tentacles.size} threads...ending" if verbose?
+	  @tentacles.each{|tentacle| tentacle.kill}
+	  break
+	end
+
+        @tentacles.select {|tentacle| tentacle.alive? }
+	page = page_queue.deq	
+	
+	if page.url == ":DEADLOCK"
+	  puts "FUCKING DEADLOCKED...shutting down" if verbose?
+	  @tentacles.each {|tentacle| tentacle.kill }
+	  break
+	end
+	
         @pages.touch_key page.url
-        puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
+        puts "#{page.url} Queue: #{link_queue.size}" if verbose?
         do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
@@ -177,19 +225,33 @@ module Anemone
 
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?
-          until link_queue.num_waiting == @tentacles.size
-            Thread.pass
+	  puts "Attempting to finish crawl...starting timestamp" if verbose?
+	  time_init = Time.now.to_i # We will wait 2 minutes for Threads to finish before the axe comes
+          time_final = time_init
+	  until (link_queue.num_waiting == @tentacles.size) or (time_final-time_init>120)
+	    time_final = Time.now.to_i
+            puts "Waiting: #{link_queue.num_waiting} Total: #{@tentacles.size}" if verbose?
+	    Thread.pass
+	    sleep 1
           end
           if page_queue.empty?
+	    #Clean exit
+	    puts "Exiting cleanly..." 
             @tentacles.size.times { link_queue << :END }
             break
           end
         end
       end
 
-      @tentacles.each { |thread| thread.join }
+      puts "How many pipes did we catch? #{Anemone.caught_pipes}"
+
+      @tentacles.each { |thread| thread.join(5) }
       do_after_crawl_blocks
       self
+    end
+
+    def verbose?
+      @opts[:verbose]
     end
 
     private
