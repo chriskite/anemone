@@ -1,6 +1,7 @@
 require 'nokogiri'
 require 'ostruct'
 require 'webrick/cookie'
+require 'set'
 
 module Anemone
   class Page
@@ -55,9 +56,9 @@ module Anemone
     # Array of distinct A tag HREFs from the page
     #
     def links
-      return @links unless @links.nil?
-      @links = []
-      return @links if !doc
+      return @links.to_a unless @links.nil?
+      @links = Set.new
+      return @links.to_a if !doc
 
       doc.search("//a[@href]").each do |a|
         u = a['href']
@@ -65,8 +66,7 @@ module Anemone
         abs = to_absolute(URI(u)) rescue next
         @links << abs if in_domain?(abs)
       end
-      @links.uniq!
-      @links
+      @links.to_a
     end
 
     #
