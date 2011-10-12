@@ -34,6 +34,12 @@ module Anemone
     # including redirects
     #
     def fetch_pages(url, referer = nil, depth = nil)
+
+      ####
+      ## This should never happen, as you have to
+      ## explicitly pass all three in as nil.
+      ## Then again, who knows....
+      ####
       if url.nil? && referer.nil? && depth.nil?
         puts "Must have been an error in the Tentacle thread..." if verbose?
 	p = [ Page.new(":DEADLOCK", :error => Exception.new) ]
@@ -54,7 +60,7 @@ module Anemone
         end
       rescue Exception => e
         if e.inspect.to_s.include?("Errno::EPIPE")
-	  puts "CAUGHT A EPIPE IN HTTP...BLOWING UP" if verbose?
+	  puts "CAUGHT A EPIPE IN HTTP" if verbose?
 	end
         pages << Page.new(url, :error => e)
 	if verbose?
@@ -133,7 +139,9 @@ module Anemone
           yield response, code, loc, redirect_to, response_time
           limit -= 1
       rescue 
-        raise $!
+        ## TODO : why am I re-raising errors like trapeze artists jumping 
+	##        from method to method....
+	raise $!
       end while (loc = redirect_to) && allowed?(redirect_to, url) && limit > 0
     end
 

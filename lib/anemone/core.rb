@@ -17,10 +17,8 @@ module Anemone
   # Convenience method to start a crawl
   #
 
-  def Anemone.too_much_pipe?
-    ## puts "Quit hittin' the pipe, brah..."
-    ## The pipe explosion limit will be arbitrary...at least in C, a SIGPIPE would DESTROY any thread/process, but ruby seems a bit different
-    pipe_limit = 20
+  def Anemone.too_much_pipe?(limit = 1000)
+    pipe_limit = limit
     pipe_limit
   end  
 
@@ -29,16 +27,12 @@ module Anemone
   end
 
   def Anemone.caught_pipes
-    if @caught_pipes.nil?
-      @caught_pipes = 0
-    end
+    Anemone.tare_pipes unless @caught_pipes
     @caught_pipes
   end
 
   def Anemone.increment_pipes
-    if @caught_pipes.nil?
-      @caught_pipes = 0
-    end
+    Anemone.tare_pipes unless @caught_pipes
     @caught_pipes += 1
   end
   
@@ -204,8 +198,12 @@ module Anemone
         @tentacles.select {|tentacle| tentacle.alive? }
 	page = page_queue.deq	
 	
+	####
+	## This exit strategy is currently deprecated, so if you
+	## find yourself exiting here...something is horribly wrong
+	####
 	if page.url == ":DEADLOCK"
-	  puts "FUCKING DEADLOCKED...shutting down" if verbose?
+	  puts "DEADLOCKED...shutting down" if verbose?
 	  @tentacles.each {|tentacle| tentacle.kill }
 	  break
 	end
@@ -243,18 +241,18 @@ module Anemone
         end
       end
 
-      puts "How many pipes did we catch? #{Anemone.caught_pipes}"
+      puts "How many sigpipes did we catch? #{Anemone.caught_pipes}"
 
       @tentacles.each { |thread| thread.join(5) }
       do_after_crawl_blocks
       self
     end
 
+    private
+
     def verbose?
       @opts[:verbose]
     end
-
-    private
 
     def process_options
       @opts = DEFAULT_OPTS.merge @opts

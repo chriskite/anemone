@@ -34,20 +34,25 @@ module Anemone
 	 delay
        rescue
          if $!.inspect.to_s.include?("Errno::EPIPE")
-           puts "FUCK! Caught a SIGPIPE. You know the drill" if verbose?
-	   puts "KILLING THIS THREAD" if verbose?
+           puts "Caught a SIGPIPE. You know the drill" if verbose?
+	   puts "Attempting to kill this thread..." if verbose?
 	   keep_alive = false
 	 end
        ensure
+########################
+## DEPRECATED EXIT STRATEGY BELOW...
+#########################
 #         unless fetched
 #           @http.fetch_pages(nil, nil, nil).each { |page| @page_queue << page }
-#       	   puts "Forced to page fetch..."
+#      	    puts "Forced to page fetch..."
 #	 end
+#########################
 	 unless keep_alive
-	   break # damnn
+	   break # die, die, die...
  	 end
        end
-      
+      this_thread = Thread.current
+      this_thread.kill ## Let's see what happens when we make this explicit...     
       end
     end
 
