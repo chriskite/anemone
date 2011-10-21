@@ -15,8 +15,8 @@ module Anemone
         end
       end
 
-      def <<(val)
-        @adap << val rescue raise InsertionError, $!
+      def <<(job)
+        @adap << job rescue raise InsertionError, $!
       end
 
       def deq

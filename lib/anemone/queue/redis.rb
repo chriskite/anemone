@@ -1,5 +1,5 @@
 begin
-  require 'redis-client'
+  require 'redis'
 rescue LoadError
   puts "You need the redis-client gem to use Anemone::Queue::Redis"
   exit
