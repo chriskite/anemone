@@ -1,14 +1,14 @@
 module Anemone
-  class Queue
+  module Queue
 
     def self.Default(*args)
       require 'anemone/queue/default'
-      Default.new(*args)
+      self::Default.new(*args)
     end
 
     def self.Redis(*args)
       require 'anemone/queue/redis'
-      Redis.new(*args)
+      self::Redis.new(*args)
     end
 
   end

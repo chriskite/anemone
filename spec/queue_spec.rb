@@ -1,16 +1,19 @@
+$:.unshift(File.dirname(__FILE__))
 require 'spec_helper'
+require 'redis'
 
 module Anemone
   describe Queue do
 
     it "should have a class method to produce a default queue" do
       Anemone::Queue.should respond_to(:Default)
-      Anemone::Queue.Default.should be_an_instance_of(Default)
+      Anemone::Queue.Default.should be_an_instance_of(Queue::Default)
     end
 
     it "should have a class method to produce a Redis queue" do
+      pending
       Anemone::Queue.should respond_to(:Redis)
-      Anemone::Queue.Redis.should be_an_instance_of(Redis)
+      Anemone::Queue.Redis.should be_an_instance_of(Queue::Redis)
     end
 
   end
@@ -43,15 +46,15 @@ module Anemone
         pending
       end
 
-    end
+      describe Default do
+        it_should_behave_like 'queue adapter'
+      end
 
-    describe Default do
-      it_should_behave_like 'queue adapter'
-    end
+      describe Redis do
+        pending
+        it_should_behave_like 'queue adapter'
+      end
 
-    describe Redis do
-      it_should_behave_like 'queue adapter'
     end
-
   end
 end

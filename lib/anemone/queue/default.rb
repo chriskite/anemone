@@ -3,7 +3,7 @@ module Anemone
     class Default < DelegateClass ::Queue
 
       def initialize
-        super Queue.new
+        super ::Queue.new
       end
 
     end
