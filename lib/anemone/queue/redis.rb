@@ -9,32 +9,59 @@ module Anemone
   module Queue
     class Redis
 
-      def initialize
-        #TODO
+      def initialize(opts = {})
+        if ['link', 'page'].include? !opts[:queue_type]
+          raise 'You must specify a queue type (link or page)'
+        end
+        @redis = ::Redis.new(opts)
+        @prefix = "#{opts[:key_prefix] || 'anemone'}:#{opts[:queue_type]}"
+        clear
       end
 
-      def <<
-        #TODO
+      def <<(job)
+        id = @redis.incr("#{@prefix}:counter")
+        job.each { |k,v| @redis.hset("#{@prefix}:#{id}", k, v) }
       end
 
       def deq
-        #TODO
+        key = keys.last
+        val = rget(key)
+        @redis.del(key)
+        val
       end
 
       def empty?
-        #TODO
+        keys.count == 0
       end
 
       def size
-        #TODO
+        keys.count
       end
 
       def num_waiting
-        #TODO
+        keys.count
       end
 
       def clear
-        #TODO
+        keys.each { |key| @redis.del(key) }
+        @redis.del("#{@prefix}:counter")
+      end
+
+      private
+
+      def each
+        keys.each { |key| yield rget(key) }
+      end
+
+      def keys
+        @redis.keys("#{@prefix}:*").select {|key| key != "#{@prefix}:counter"}
+      end
+
+      def rget(key)
+        @redis.hkeys(key).inject({}) do |hash, rkey|
+          hash[rkey] = @redis.hget(key, rkey)
+          hash
+        end
       end
 
     end

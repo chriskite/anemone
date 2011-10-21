@@ -19,11 +19,15 @@ module Anemone
     module Queue
       shared_examples_for :an_adapter do
 
+        let(:test_data) { {'foo' => 'bar', 'herp' => 'derp'} }
+
         it 'should implement << and deq' do
           @queue.should respond_to(:<<)
           @queue.should respond_to(:deq)
-          @queue << 'test'
-          @queue.deq.should == 'test'
+          @queue << test_data
+          @queue.size.should == 1
+          @queue.deq.should == test_data
+          @queue.size.should == 0
         end
 
         it 'should implement empty?' do
@@ -31,7 +35,7 @@ module Anemone
 
           @queue.empty?.should be_true
 
-          @queue << 'test'
+          @queue << test_data
           @queue.empty?.should be_false
 
           @queue.deq
@@ -43,7 +47,7 @@ module Anemone
 
           @queue.size.should == 0
 
-          @queue << 'test'
+          @queue << test_data
           @queue.size.should == 1
         end
 
@@ -54,7 +58,7 @@ module Anemone
         it 'should implement clear' do
           @queue.should respond_to(:clear)
 
-          @queue << 'test'
+          @queue << test_data
           @queue.clear
           @queue.size.should == 0
         end
@@ -64,12 +68,27 @@ module Anemone
       describe Default do
         it_should_behave_like :an_adapter
 
-        before(:each) { @queue = Anemone::Queue.Default }
+        before(:each) { @queue = Queue.Default }
         after(:all)   { @queue = nil }
+
       end
 
       describe Redis do
-        #it_should_behave_like :an_adapter #TODO
+        it_should_behave_like :an_adapter
+
+        before(:all) { @queue = Queue.Redis(:queue_type => 'link') }
+        after(:each) { @queue.clear }
+        after(:all)   { @queue = nil }
+
+        describe '#initialize' do
+          context 'when a queue_type is not "link" or "page"' do
+            it 'raises an error' do
+              expect { Queue.Redis.new }.to raise_error
+              expect { Queue.Redis.new(:queue_type => 'foo') }.to raise_error
+            end
+          end
+        end
+
       end
 
     end
