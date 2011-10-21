@@ -1,61 +1,56 @@
 require 'spec_helper'
 
 module Anemone
+  describe Queue do
+
+    it "should have a class method to produce a default queue" do
+      Anemone::Queue.should respond_to(:Default)
+      Anemone::Queue.Default.should be_an_instance_of(Default)
+    end
+
+    it "should have a class method to produce a Redis queue" do
+      Anemone::Queue.should respond_to(:Redis)
+      Anemone::Queue.Redis.should be_an_instance_of(Redis)
+    end
+
+  end
+
   module Queue
 
+    shared_examples_for 'queue adapter' do
+
+      it 'should implement <<' do
+        pending
+      end
+
+      it 'should implement deq' do
+        pending
+      end
+
+      it 'should implement empty?' do
+        pending
+      end
+
+      it 'should implement size' do
+        pending
+      end
+
+      it 'should implement num_waiting' do
+        pending
+      end
+
+      it 'should implement clear' do
+        pending
+      end
+
+    end
+
+    describe Default do
+      it_should_behave_like 'queue adapter'
+    end
+
     describe Redis do
-
-      describe '#initialize' do
-        it 'creates a new Redis queue' do
-          pending
-        end
-      end
-
-      describe '<<' do
-        context 'given a job' do
-          it 'pushes it onto the back' do
-            pending
-          end
-        end
-      end
-
-      describe 'deq' do
-        it 'pops a job off the front and returns it' do
-          pending
-        end
-      end
-
-      describe 'empty?' do
-        context 'when the queue is empty' do
-          it 'returns true' do
-            pendign
-          end
-        end
-        context 'when the queue is not empty' do
-          it 'returns false' do
-            pending
-          end
-        end
-      end
-
-      describe 'size' do
-        it 'returns how many jobs exist' do
-          pending
-        end
-      end
-
-      describe 'num_waiting' do
-        it 'returns how many jobs are in waiting state' do
-          pending
-        end
-      end
-
-      describe 'clear' do
-        it 'clears all the jobs' do
-          pending
-        end
-      end
-
+      it_should_behave_like 'queue adapter'
     end
 
   end
