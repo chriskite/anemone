@@ -1,6 +1,7 @@
 $:.unshift(File.dirname(__FILE__))
 require 'spec_helper'
-require 'redis'
+
+%w[default redis].each { |file| require "anemone/queue/#{file}.rb" }
 
 module Anemone
   describe Queue do
@@ -11,48 +12,64 @@ module Anemone
     end
 
     it "should have a class method to produce a Redis queue" do
-      pending
       Anemone::Queue.should respond_to(:Redis)
       Anemone::Queue.Redis.should be_an_instance_of(Queue::Redis)
     end
 
-  end
+    module Queue
+      shared_examples_for :an_adapter do
 
-  module Queue
+        it 'should implement << and deq' do
+          @queue.should respond_to(:<<)
+          @queue.should respond_to(:deq)
+          @queue << 'test'
+          @queue.deq.should == 'test'
+        end
 
-    shared_examples_for 'queue adapter' do
+        it 'should implement empty?' do
+          @queue.should respond_to(:empty?)
 
-      it 'should implement <<' do
-        pending
-      end
+          @queue.empty?.should be_true
 
-      it 'should implement deq' do
-        pending
-      end
+          @queue << 'test'
+          @queue.empty?.should be_false
 
-      it 'should implement empty?' do
-        pending
-      end
+          @queue.deq
+          @queue.empty?.should be_true
+        end
 
-      it 'should implement size' do
-        pending
-      end
+        it 'should implement size' do
+          @queue.should respond_to(:size)
 
-      it 'should implement num_waiting' do
-        pending
-      end
+          @queue.size.should == 0
 
-      it 'should implement clear' do
-        pending
+          @queue << 'test'
+          @queue.size.should == 1
+        end
+
+        it 'should implement num_waiting' do
+          @queue.should respond_to(:num_waiting)
+        end
+
+        it 'should implement clear' do
+          @queue.should respond_to(:clear)
+
+          @queue << 'test'
+          @queue.clear
+          @queue.size.should == 0
+        end
+
       end
 
       describe Default do
-        it_should_behave_like 'queue adapter'
+        it_should_behave_like :an_adapter
+
+        before(:each) { @queue = Anemone::Queue.Default }
+        after(:all)   { @queue = nil }
       end
 
       describe Redis do
-        pending
-        it_should_behave_like 'queue adapter'
+        #it_should_behave_like :an_adapter #TODO
       end
 
     end
