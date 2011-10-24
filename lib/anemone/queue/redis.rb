@@ -9,12 +9,12 @@ module Anemone
   module Queue
     class Redis
 
-      def initialize(opts = {})
-        if ['link', 'page'].include? !opts[:queue_type]
-          raise 'You must specify a queue type (link or page)'
+      def initialize(queue_type, opts = {})
+        if [:link, :page].include? !queue_type
+          raise 'You must specify a queue type (:link or :page)'
         end
         @redis = ::Redis.new(opts)
-        @prefix = "#{opts[:key_prefix] || 'anemone'}:#{opts[:queue_type]}"
+        @prefix = "#{opts[:key_prefix] || 'anemone'}:#{queue_type}"
         clear
       end
 

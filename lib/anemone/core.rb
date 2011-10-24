@@ -57,7 +57,15 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil
+      :read_timeout => nil,
+      # use default queue adapter for link queue
+      :link_queue_adapter => :Default,
+      # link queue options sub-hash
+      :link_queue_options => {},
+      # use default queue adapter for page queue
+      :page_queue_adapter => :Default,
+      # page queue options sub-hash
+      :page_queue_options => {},
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -153,8 +161,17 @@ module Anemone
       @urls.delete_if { |url| !visit_link?(url) }
       return if @urls.empty?
 
-      link_queue = ::Queue.new
-      page_queue = ::Queue.new
+      # create link queue
+      if Queue.methods.include? !@opts[:link_queue_adapter]
+        raise "Unknown link queue adapter #{@opts[:link_queue_adapter]}"
+      end
+      link_queue = Queue.send(@opts[:link_queue_adapter], :link, @opts[:link_queue_options])
+
+      # create page queue
+      if Queue.methods.include? !@opts[:link_queue_adapter]
+        raise "Unknown link queue adapter #{@opts[:link_queue_adapter]}"
+      end
+      page_queue = Queue.send(@opts[:page_queue_adapter], :page, @opts[:page_queue_options])
 
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }

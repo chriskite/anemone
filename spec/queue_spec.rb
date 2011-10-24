@@ -7,13 +7,13 @@ module Anemone
   describe Queue do
 
     it "should have a class method to produce a default queue" do
-      Anemone::Queue.should respond_to(:Default)
-      Anemone::Queue.Default.should be_an_instance_of(Queue::Default)
+      Anemone::Queue.should respond_to(:Default).with(1).argument
+      Anemone::Queue.Default(:link).should be_an_instance_of(Queue::Default)
     end
 
     it "should have a class method to produce a Redis queue" do
-      Anemone::Queue.should respond_to(:Redis)
-      Anemone::Queue.Redis.should be_an_instance_of(Queue::Redis)
+      Anemone::Queue.should respond_to(:Redis).with(1).argument
+      Anemone::Queue.Redis(:link).should be_an_instance_of(Queue::Redis)
     end
 
     module Queue
@@ -68,7 +68,7 @@ module Anemone
       describe Default do
         it_should_behave_like :an_adapter
 
-        before(:each) { @queue = Queue.Default }
+        before(:each) { @queue = Queue.Default(:link) }
         after(:all)   { @queue = nil }
 
       end
@@ -76,7 +76,7 @@ module Anemone
       describe Redis do
         it_should_behave_like :an_adapter
 
-        before(:all) { @queue = Queue.Redis(:queue_type => 'link') }
+        before(:all) { @queue = Queue.Redis(:link) }
         after(:each) { @queue.clear }
         after(:all)   { @queue = nil }
 
