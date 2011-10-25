@@ -1,19 +1,19 @@
 $:.unshift(File.dirname(__FILE__))
 require 'spec_helper'
 
-%w[default redis].each { |file| require "anemone/queue/#{file}.rb" }
+%w[basic redis].each { |file| require "anemone/queue/#{file}.rb" }
 
 module Anemone
   describe Queue do
 
     it "should have a class method to produce a default queue" do
-      Anemone::Queue.should respond_to(:Default).with(1).argument
-      Anemone::Queue.Default(:link).should be_an_instance_of(Queue::Default)
+      Anemone::Queue.should respond_to(:Basic)
+      Anemone::Queue.Basic.should be_an_instance_of(Queue::Basic)
     end
 
     it "should have a class method to produce a Redis queue" do
-      Anemone::Queue.should respond_to(:Redis).with(1).argument
-      Anemone::Queue.Redis(:link).should be_an_instance_of(Queue::Redis)
+      Anemone::Queue.should respond_to(:Redis)
+      Anemone::Queue.Redis.should be_an_instance_of(Queue::Redis)
     end
 
     module Queue
@@ -52,7 +52,14 @@ module Anemone
         end
 
         it 'should implement num_waiting' do
+          pending 'need a better way to test this'
           @queue.should respond_to(:num_waiting)
+
+          @queue.num_waiting.should == 0
+
+          threads = []
+          3.times { threads << Thread.new { @queue.deq } }
+          @queue.num_waiting.should == 3
         end
 
         it 'should implement clear' do
@@ -65,10 +72,10 @@ module Anemone
 
       end
 
-      describe Default do
+      describe Basic do
         it_should_behave_like :an_adapter
 
-        before(:each) { @queue = Queue.Default(:link) }
+        before(:each) { @queue = Queue.Basic }
         after(:all)   { @queue = nil }
 
       end
@@ -76,18 +83,9 @@ module Anemone
       describe Redis do
         it_should_behave_like :an_adapter
 
-        before(:all) { @queue = Queue.Redis(:link) }
+        before(:all) { @queue = Queue.Redis(:timeout => 1) }
         after(:each) { @queue.clear }
-        after(:all)   { @queue = nil }
-
-        describe '#initialize' do
-          context 'when a queue_type is not "link" or "page"' do
-            it 'raises an error' do
-              expect { Queue.Redis.new }.to raise_error
-              expect { Queue.Redis.new(:queue_type => 'foo') }.to raise_error
-            end
-          end
-        end
+        after(:all)  { @queue = nil }
 
       end
 

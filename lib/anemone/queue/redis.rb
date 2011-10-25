@@ -9,59 +9,39 @@ module Anemone
   module Queue
     class Redis
 
-      def initialize(queue_type, opts = {})
-        if [:link, :page].include? !queue_type
-          raise 'You must specify a queue type (:link or :page)'
-        end
+      def initialize(opts = {})
         @redis = ::Redis.new(opts)
-        @prefix = "#{opts[:key_prefix] || 'anemone'}:#{queue_type}"
+        @list = "#{opts[:key_prefix] || 'anemone'}:#{self.hash.abs}"
+        @waiting = "#{@list}:waiting"
+        @timeout = opts[:timeout] || 60
         clear
       end
 
       def <<(job)
-        id = @redis.incr("#{@prefix}:counter")
-        job.each { |k,v| @redis.hset("#{@prefix}:#{id}", k, v) }
+        @redis.lpush(@list,job.to_json)
       end
 
       def deq
-        key = keys.last
-        val = rget(key)
-        @redis.del(key)
-        val
+        @redis.incr(@waiting)
+        json = @redis.brpop(@list, @timeout)
+        @redis.decr(@waiting)
+        JSON.parse(json.last) rescue nil
       end
 
       def empty?
-        keys.count == 0
+        size == 0
       end
 
       def size
-        keys.count
+        @redis.llen(@list)
       end
 
       def num_waiting
-        keys.count
+        @redis.get(@waiting).to_i
       end
 
       def clear
-        keys.each { |key| @redis.del(key) }
-        @redis.del("#{@prefix}:counter")
-      end
-
-      private
-
-      def each
-        keys.each { |key| yield rget(key) }
-      end
-
-      def keys
-        @redis.keys("#{@prefix}:*").select {|key| key != "#{@prefix}:counter"}
-      end
-
-      def rget(key)
-        @redis.hkeys(key).inject({}) do |hash, rkey|
-          hash[rkey] = @redis.hget(key, rkey)
-          hash
-        end
+        @redis.del(@list, @waiting)
       end
 
     end

@@ -1,5 +1,6 @@
 require 'thread'
 require 'robots'
+require 'json'
 require 'anemone/tentacle'
 require 'anemone/page'
 require 'anemone/exceptions'
@@ -57,15 +58,7 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil,
-      # use default queue adapter for link queue
-      :link_queue_adapter => :Default,
-      # link queue options sub-hash
-      :link_queue_options => {},
-      # use default queue adapter for page queue
-      :page_queue_adapter => :Default,
-      # page queue options sub-hash
-      :page_queue_options => {},
+      :read_timeout => nil
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -162,16 +155,10 @@ module Anemone
       return if @urls.empty?
 
       # create link queue
-      if Queue.methods.include? !@opts[:link_queue_adapter]
-        raise "Unknown link queue adapter #{@opts[:link_queue_adapter]}"
-      end
-      link_queue = Queue.send(@opts[:link_queue_adapter], :link, @opts[:link_queue_options])
+      link_queue = @opts[:link_queue] || Anemone::Queue.Basic
 
       # create page queue
-      if Queue.methods.include? !@opts[:link_queue_adapter]
-        raise "Unknown link queue adapter #{@opts[:link_queue_adapter]}"
-      end
-      page_queue = Queue.send(@opts[:page_queue_adapter], :page, @opts[:page_queue_options])
+      page_queue = @opts[:page_queue] || Anemone::Queue.Basic
 
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
