@@ -52,14 +52,22 @@ module Anemone
         end
 
         it 'should implement num_waiting' do
-          pending 'need a better way to test this'
           @queue.should respond_to(:num_waiting)
 
           @queue.num_waiting.should == 0
 
           threads = []
-          3.times { threads << Thread.new { @queue.deq } }
-          @queue.num_waiting.should == 3
+          2.times { threads << Thread.new { @queue.deq } }
+          sleep(0.2)
+          @queue.num_waiting.should == 2
+
+          @queue << test_data
+          sleep(0.2)
+          @queue.num_waiting.should == 1
+
+          @queue << test_data
+          sleep(0.2)
+          @queue.num_waiting.should == 0
         end
 
         it 'should implement clear' do
@@ -83,7 +91,7 @@ module Anemone
       describe Redis do
         it_should_behave_like :an_adapter
 
-        before(:all) { @queue = Queue.Redis(:timeout => 1) }
+        before(:all) { @queue = Queue.Redis(:timeout => 0.1) }
         after(:each) { @queue.clear }
         after(:all)  { @queue = nil }
 

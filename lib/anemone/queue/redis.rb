@@ -13,7 +13,7 @@ module Anemone
         @redis = ::Redis.new(opts)
         @list = "#{opts[:key_prefix] || 'anemone'}:#{self.hash.abs}"
         @waiting = "#{@list}:waiting"
-        @timeout = opts[:timeout] || 60
+        @timeout = opts[:timeout] || 10
         clear
       end
 
@@ -22,10 +22,15 @@ module Anemone
       end
 
       def deq
-        @redis.incr(@waiting)
-        json = @redis.brpop(@list, @timeout)
-        @redis.decr(@waiting)
-        JSON.parse(json.last) rescue nil
+        json = @redis.rpop(@list)
+        if json.nil?
+          @redis.incr(@waiting)
+          until json = @redis.rpop(@list)
+            sleep(@timeout)
+          end
+          @redis.decr(@waiting)
+        end
+        JSON.parse(json) rescue nil
       end
 
       def empty?
