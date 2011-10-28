@@ -56,18 +56,13 @@ module Anemone
 
           @queue.num_waiting.should == 0
 
-          threads = []
-          2.times { threads << Thread.new { @queue.deq } }
-          sleep(0.2)
-          @queue.num_waiting.should == 2
+          3.times { Thread.new { @queue.deq } }
 
-          @queue << test_data
-          sleep(0.2)
-          @queue.num_waiting.should == 1
-
-          @queue << test_data
-          sleep(0.2)
-          @queue.num_waiting.should == 0
+          [3,2,1,0].each do |n|
+            sleep(0.2)
+            @queue.num_waiting.should == n
+            @queue << test_data
+          end
         end
 
         it 'should implement clear' do
@@ -91,7 +86,7 @@ module Anemone
       describe Redis do
         it_should_behave_like :an_adapter
 
-        before(:all) { @queue = Queue.Redis(:timeout => 0.1) }
+        before(:all) { @queue = Queue.Redis }
         after(:each) { @queue.clear }
         after(:all)  { @queue = nil }
 

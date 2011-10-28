@@ -10,27 +10,21 @@ module Anemone
     class Redis
 
       def initialize(opts = {})
-        @redis = ::Redis.new(opts)
-        @list = "#{opts[:key_prefix] || 'anemone'}:#{self.hash.abs}"
+        @opts = opts
+        @list = "#{@opts[:key_prefix] || 'anemone'}:#{self.hash.abs}"
         @waiting = "#{@list}:waiting"
-        @timeout = opts[:timeout] || 10
         clear
       end
 
       def <<(job)
-        @redis.lpush(@list,job.to_json)
+        redis.lpush(@list,job.to_json)
       end
 
       def deq
-        json = @redis.rpop(@list)
-        if json.nil?
-          @redis.incr(@waiting)
-          until json = @redis.rpop(@list)
-            sleep(@timeout)
-          end
-          @redis.decr(@waiting)
-        end
-        JSON.parse(json) rescue nil
+        redis.incr(@waiting)
+        job = redis.brpop(@list, @opts[:timeout] || 0)
+        redis.decr(@waiting)
+        JSON.parse(job.last) rescue nil
       end
 
       def empty?
@@ -38,15 +32,21 @@ module Anemone
       end
 
       def size
-        @redis.llen(@list)
+        redis.llen(@list)
       end
 
       def num_waiting
-        @redis.get(@waiting).to_i
+        redis.get(@waiting).to_i
       end
 
       def clear
-        @redis.del(@list, @waiting)
+        redis.del(@list, @waiting)
+      end
+
+      private
+
+      def redis
+        Thread.current[:redis] ||= ::Redis.new(@opts)
       end
 
     end
