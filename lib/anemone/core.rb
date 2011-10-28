@@ -1,15 +1,18 @@
 require 'thread'
 require 'robots'
+require 'json'
 require 'anemone/tentacle'
 require 'anemone/page'
 require 'anemone/exceptions'
 require 'anemone/page_store'
 require 'anemone/storage'
 require 'anemone/storage/base'
+require 'anemone/queue'
+require 'anemone/queue/base'
 
 module Anemone
 
-  VERSION = '0.6.1';
+  VERSION = '0.6.1'
 
   #
   # Convenience method to start a crawl
@@ -151,8 +154,11 @@ module Anemone
       @urls.delete_if { |url| !visit_link?(url) }
       return if @urls.empty?
 
-      link_queue = Queue.new
-      page_queue = Queue.new
+      # create link queue
+      link_queue = @opts[:link_queue] || Anemone::Queue.Basic
+
+      # create page queue
+      page_queue = @opts[:page_queue] || Anemone::Queue.Basic
 
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }

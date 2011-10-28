@@ -66,7 +66,7 @@ module Anemone
       root = URI(root) if root.is_a?(String)
       raise "Root node not found" if !has_key?(root)
 
-      q = Queue.new
+      q = ::Queue.new
 
       q.enq root
       root_page = self[root]

@@ -2,6 +2,7 @@ source :rubygems
 
 gem 'nokogiri'
 gem 'robots'
+gem 'json'
 
 group :development do
     gem 'fakeweb'
