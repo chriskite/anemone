@@ -132,6 +132,21 @@ module Anemone
     end
 
     #
+    # Base URI from the HTML doc head element
+    # http://www.w3.org/TR/html4/struct/links.html#edef-BASE
+    #
+    def base
+      @base = if doc
+        href = doc.search('//head/base/@href')
+        URI(href.to_s) unless href.nil? rescue nil
+      end unless @base
+      
+      return nil if @base && @base.to_s().empty?
+      @base
+    end
+
+
+    #
     # Converts relative URL *link* into an absolute URL based on the
     # location of the page
     #
@@ -142,7 +157,7 @@ module Anemone
       link = URI.encode(URI.decode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,'')))
 
       relative = URI(link)
-      absolute = @url.merge(relative)
+      absolute = base ? base.merge(relative) : @url.merge(relative)
 
       absolute.path = '/' if absolute.path.empty?
 
