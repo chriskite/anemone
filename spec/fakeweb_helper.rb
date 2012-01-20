@@ -1,10 +1,3 @@
-begin
-  require 'fakeweb'
-rescue LoadError
-  warn "You need the 'fakeweb' gem installed to test Anemone"
-  exit
-end
-
 FakeWeb.allow_net_connect = false
 
 module Anemone
@@ -22,6 +15,7 @@ module Anemone
       @hrefs = [options[:hrefs]].flatten if options.has_key?(:hrefs)
       @redirect = options[:redirect] if options.has_key?(:redirect)
       @auth = options[:auth] if options.has_key?(:auth)
+      @base = options[:base] if options.has_key?(:base)      
       @content_type = options[:content_type] || "text/html"
       @body = options[:body]
 
@@ -40,7 +34,11 @@ module Anemone
     private
 
     def create_body
-      @body = "<html><body>"
+      if @base
+        @body = "<html><head><base href=\"#{@base}\"></head><body>"
+      else
+        @body = "<html><body>"
+      end
       @links.each{|l| @body += "<a href=\"#{SPEC_DOMAIN}#{l}\"></a>"} if @links
       @hrefs.each{|h| @body += "<a href=\"#{h}\"></a>"} if @hrefs
       @body += "</body></html>"
