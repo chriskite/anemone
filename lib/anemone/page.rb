@@ -190,7 +190,7 @@ module Anemone
        '@visited' => hash['visited'],
        '@depth' => hash['depth'].to_i,
        '@referer' => hash['referer'],
-       '@redirect_to' => URI(hash['redirect_to'] || ''),
+       '@redirect_to' => (!!hash['redirect_to'] && !hash['redirect_to'].empty?) ? URI(hash['redirect_to']) : nil,
        '@response_time' => hash['response_time'].to_i,
        '@fetched' => hash['fetched']
       }.each do |var, value|

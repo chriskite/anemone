@@ -113,6 +113,12 @@ module Anemone
 
           merged.should === @store
         end
+
+        it "should correctly deserialize nil redirect_to when loading" do
+          @page.redirect_to.should be_nil
+          @store[@url] = @page 
+          @store[@url].redirect_to.should be_nil
+        end
       end
 
       describe PStore do

@@ -74,25 +74,56 @@ module Anemone
       @page.cookies.should == []
     end
 
-    it "should have a to_hash method that converts the page to a hash" do
-      hash = @page.to_hash
-      hash['url'].should == @page.url.to_s
-      hash['referer'].should == @page.referer.to_s
-      hash['links'].should == @page.links.map(&:to_s)
+    describe "#to_hash" do
+      it "converts the page to a hash" do
+        hash = @page.to_hash
+        hash['url'].should == @page.url.to_s
+        hash['referer'].should == @page.referer.to_s
+        hash['links'].should == @page.links.map(&:to_s)
+      end
+
+      context "when redirect_to is nil" do
+        it "sets 'redirect_to' to nil in the hash" do
+          @page.redirect_to.should be_nil
+          @page.to_hash[:redirect_to].should be_nil
+        end
+      end
+
+      context "when redirect_to is a non-nil URI" do
+        it "sets 'redirect_to' to the URI string" do
+          new_page = Page.new(URI(SPEC_DOMAIN), {:redirect_to => URI(SPEC_DOMAIN + '1')})
+          new_page.redirect_to.to_s.should == SPEC_DOMAIN + '1'
+          new_page.to_hash['redirect_to'].should == SPEC_DOMAIN + '1'
+        end
+      end
     end
 
-    it "should have a from_hash method to convert from a hash to a Page" do
-      page = @page.dup
-      page.depth = 1
-      converted = Page.from_hash(page.to_hash)
-      converted.links.should == page.links
-      converted.depth.should == page.depth
+    describe "#from_hash" do
+      it "converts from a hash to a Page" do
+        page = @page.dup
+        page.depth = 1
+        converted = Page.from_hash(page.to_hash)
+        converted.links.should == page.links
+        converted.depth.should == page.depth
+      end
+
+      it 'handles a from_hash with a nil redirect_to' do
+        page_hash = @page.to_hash
+        page_hash['redirect_to'] = nil
+        lambda{Page.from_hash(page_hash)}.should_not raise_error(URI::InvalidURIError)
+        Page.from_hash(page_hash).redirect_to.should be_nil
+      end
     end
 
-    it 'should handle a from_hash with a nil redirect_to' do
-      page_hash = @page.to_hash
-      page_hash['redirect_to'] = nil
-      lambda{Page.from_hash(page_hash)}.should_not raise_error(URI::InvalidURIError)
+    describe "#redirect_to" do
+      context "when the page was a redirect" do
+        it "returns a URI of the page it redirects to" do
+          new_page = Page.new(URI(SPEC_DOMAIN), {:redirect_to => URI(SPEC_DOMAIN + '1')})
+          redirect = new_page.redirect_to
+          redirect.should be_a(URI)
+          redirect.to_s.should == SPEC_DOMAIN + '1'
+        end
+      end
     end
 
   end
