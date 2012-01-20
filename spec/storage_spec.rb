@@ -1,7 +1,7 @@
 $:.unshift(File.dirname(__FILE__))
 require 'spec_helper'
 
-%w[pstore tokyo_cabinet sqlite3 mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
+%w[pstore tokyo_cabinet kyoto_cabinet sqlite3 mongodb redis].each { |file| require "anemone/storage/#{file}.rb" }
 
 module Anemone
   describe Storage do
@@ -154,6 +154,28 @@ module Anemone
 
         it "should raise an error if supplied with a file extension other than .tch" do
           lambda { Anemone::Storage.TokyoCabinet('test.tmp') }.should raise_error(RuntimeError)
+        end
+      end
+
+      describe KyotoCabinet do
+        it_should_behave_like "storage engine"
+
+        before(:each) do
+          @test_file = 'test.kch'
+          File.delete @test_file rescue nil
+          @store =  Anemone::Storage.KyotoCabinet(@test_file)
+        end
+
+        after(:each) do
+          @store.close
+        end
+
+        after(:all) do
+          File.delete @test_file rescue nil
+        end
+
+        it "should raise an error if supplied with a file extension other than .kch" do
+          lambda { Anemone::Storage.KyotoCabinet('test.tmp') }.should raise_error(RuntimeError)
         end
       end
 

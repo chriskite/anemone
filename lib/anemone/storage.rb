@@ -18,6 +18,11 @@ module Anemone
       self::TokyoCabinet.new(file)
     end
 
+    def self.KyotoCabinet(file = 'anemone.tch')
+      require 'anemone/storage/kyoto_cabinet'
+      self::KyotoCabinet.new(file)
+    end
+
     def self.MongoDB(mongo_db = nil, collection_name = 'pages')
       require 'anemone/storage/mongodb'
       mongo_db ||= Mongo::Connection.new.db('anemone')
