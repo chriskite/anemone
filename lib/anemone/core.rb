@@ -1,5 +1,5 @@
 require 'thread'
-require 'robots'
+require 'robotex'
 require 'anemone/tentacle'
 require 'anemone/page'
 require 'anemone/exceptions'
@@ -199,7 +199,7 @@ module Anemone
       @opts[:threads] = 1 if @opts[:delay] > 0
       storage = Anemone::Storage::Base.new(@opts[:storage] || Anemone::Storage.Hash)
       @pages = PageStore.new(storage)
-      @robots = Robots.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
+      @robots = Robotex.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
 
       freeze_options
     end
