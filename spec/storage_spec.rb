@@ -6,45 +6,70 @@ require 'spec_helper'
 module Anemone
   describe Storage do
 
-    it "should have a class method to produce a Hash" do
-      Anemone::Storage.should respond_to(:Hash)
-      Anemone::Storage.Hash.should be_an_instance_of(Hash)
+    describe ".Hash" do
+      it "returns a Hash adapter" do
+        Anemone::Storage.Hash.should be_an_instance_of(Hash)
+      end
     end
 
-    it "should have a class method to produce a PStore" do
-      test_file = 'test.pstore'
-      Anemone::Storage.should respond_to(:PStore)
-      Anemone::Storage.PStore(test_file).should be_an_instance_of(Anemone::Storage::PStore)
+    describe ".PStore" do
+      it "returns a PStore adapter" do
+        test_file = 'test.pstore'
+        Anemone::Storage.PStore(test_file).should be_an_instance_of(Anemone::Storage::PStore)
+      end
     end
 
-    it "should have a class method to produce a TokyoCabinet" do
-      test_file = 'test.tch'
-      Anemone::Storage.should respond_to(:TokyoCabinet)
-      store = Anemone::Storage.TokyoCabinet(test_file)
-      store.should be_an_instance_of(Anemone::Storage::TokyoCabinet)
-      store.close
+    describe ".TokyoCabinet" do
+      it "returns a TokyoCabinet adapter" do
+        test_file = 'test.tch'
+        store = Anemone::Storage.TokyoCabinet(test_file)
+        store.should be_an_instance_of(Anemone::Storage::TokyoCabinet)
+        store.close
+      end
     end
 
-    it "should have a class method to produce a SQLite3" do
-      test_file = 'test.db'
-      Anemone::Storage.should respond_to(:SQLite3)
-      store = Anemone::Storage.SQLite3(test_file)
-      store.should be_an_instance_of(Anemone::Storage::SQLite3)
-      store.close
+    describe ".KyotoCabinet" do
+      context "when the file is specified" do
+        it "returns a KyotoCabinet adapter using that file" do
+          test_file = 'test.kch'
+          store = Anemone::Storage.KyotoCabinet(test_file)
+          store.should be_an_instance_of(Anemone::Storage::KyotoCabinet)
+          store.close
+        end
+      end
+
+      context "when no file is specified" do
+        it "returns a KyotoCabinet adapter using the default filename" do
+          store = Anemone::Storage.KyotoCabinet
+          store.should be_an_instance_of(Anemone::Storage::KyotoCabinet)
+          store.close
+        end
+      end
     end
 
-    it "should have a class method to produce a MongoDB" do
-      Anemone::Storage.should respond_to(:MongoDB)
-      store = Anemone::Storage.MongoDB
-      store.should be_an_instance_of(Anemone::Storage::MongoDB)
-      store.close
+    describe ".SQLite3" do
+      it "returns a SQLite3 adapter" do
+        test_file = 'test.db'
+        store = Anemone::Storage.SQLite3(test_file)
+        store.should be_an_instance_of(Anemone::Storage::SQLite3)
+        store.close
+      end
     end
 
-    it "should have a class method to produce a Redis" do
-      Anemone::Storage.should respond_to(:Redis)
-      store = Anemone::Storage.Redis
-      store.should be_an_instance_of(Anemone::Storage::Redis)
-      store.close
+    describe ".MongoDB" do
+      it "returns a MongoDB adapter" do
+        store = Anemone::Storage.MongoDB
+        store.should be_an_instance_of(Anemone::Storage::MongoDB)
+        store.close
+      end
+    end
+
+    describe ".MongoDB" do
+      it "returns a Redis adapter" do
+        store = Anemone::Storage.Redis
+        store.should be_an_instance_of(Anemone::Storage::Redis)
+        store.close
+      end
     end
 
     module Storage

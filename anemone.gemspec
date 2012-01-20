@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = "anemone"
-  s.version = "0.7.0"
+  s.version = "0.7.1"
   s.author = "Chris Kite"
   s.homepage = "http://anemone.rubyforge.org"
   s.rubyforge_project = "anemone"
@@ -12,10 +12,11 @@ spec = Gem::Specification.new do |s|
   s.rdoc_options << '-m' << 'README.rdoc' << '-t' << 'Anemone'
   s.extra_rdoc_files = ["README.rdoc"]
   s.add_dependency("nokogiri", ">= 1.3.0")
-  s.add_dependency("robots", ">= 0.7.2")
+  s.add_dependency("robotex", ">= 1.0.0")
 
-  s.add_development_dependency "rake", ">=0.8.7"
-  s.add_development_dependency "rspec", ">=2.6.0"
+  s.add_development_dependency "rake", ">=0.9.2"
+  s.add_development_dependency "rdoc", ">=3.12"
+  s.add_development_dependency "rspec", ">=2.8.0"
   s.add_development_dependency "fakeweb", ">=1.3.0"
   s.add_development_dependency "redis", ">=2.2.0"
   s.add_development_dependency "mongo", ">=1.3.1"

@@ -1,3 +1,13 @@
+== 0.7.1 / 2012-01-20
+
+* Minor enhancements
+
+  * Switch from robots gem (which people reported problems with) to new robotex gem
+
+* Bug fixes
+
+  * Fix incorrect default file extension for KyotoCabinet
+
 == 0.7.0 / 2012-01-19
 
 * Major enhancements
