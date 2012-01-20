@@ -21,6 +21,7 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency "mongo", ">=1.3.1"
   s.add_development_dependency "bson_ext", ">=1.3.1"
   s.add_development_dependency "tokyocabinet", ">=1.29"
+  s.add_development_dependency "kyotocabinet-ruby", ">=1.27.1"
   s.add_development_dependency "sqlite3", ">=1.3.4"
 
   s.files = %w[
