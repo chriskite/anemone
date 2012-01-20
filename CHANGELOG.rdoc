@@ -1,6 +1,23 @@
+== 0.7.0 / 2012-01-19
+
+* Major enhancements
+
+  * Added support for SQLite3 and Kyoto Cabinet storage
+
+* Minor enhancements
+
+  * Added Page#base to use base HTML element
+  * Use bundler for development dependencies
+
+* Bug fixes
+
+  * Encode characters in URLs
+  * Fix specs to run under rake
+  * Fix handling of redirect_to in storage adapters
+
 == 0.6.1 / 2011-02-24
 
-*Bug fixes
+* Bug fixes
 
   * Fix a bug preventing SSL connections from working
 
