@@ -18,7 +18,7 @@ module Anemone
       self::TokyoCabinet.new(file)
     end
 
-    def self.KyotoCabinet(file = 'anemone.tch')
+    def self.KyotoCabinet(file = 'anemone.kch')
       require 'anemone/storage/kyoto_cabinet'
       self::KyotoCabinet.new(file)
     end
