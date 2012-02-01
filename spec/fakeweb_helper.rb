@@ -1,8 +1,9 @@
 FakeWeb.allow_net_connect = false
 
 module Anemone
+  AUTH = ['user', 'pass']
   SPEC_DOMAIN = "http://www.example.com/"
-  AUTH_SPEC_DOMAIN = "http://user:pass@#{URI.parse(SPEC_DOMAIN).host}/"
+  AUTH_SPEC_DOMAIN = "http://#{AUTH.join(':')}@#{URI.parse(SPEC_DOMAIN).host}/"
 
   class FakePage
     attr_accessor :links

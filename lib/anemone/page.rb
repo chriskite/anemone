@@ -97,14 +97,14 @@ module Anemone
     # Array of cookies received with this page as WEBrick::Cookie objects.
     #
     def cookies
-      WEBrick::Cookie.parse_set_cookies(@headers['Set-Cookie']) rescue []
+      WEBrick::Cookie.parse_set_cookies(@headers['set-cookie']) rescue []
     end
 
     #
     # The content-type returned by the HTTP request for this page
     #
     def content_type
-      headers['content-type'].first
+      headers['content-type']
     end
 
     #

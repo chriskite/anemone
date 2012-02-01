@@ -172,6 +172,5 @@ module Anemone
       upward_base = "#{SPEC_DOMAIN}path/to/"
       page.to_absolute(upward_relative_path).should == URI("#{upward_base}#{relative_path}")      
     end
-
   end
 end

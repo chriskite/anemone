@@ -55,8 +55,11 @@ module Anemone
         pages = []
         pages << FakePage.new('0', :links => ['1', '2'], :auth => true)
         pages << FakePage.new('1', :links => ['3'], :auth => true)
-
-        Anemone.crawl(pages.first.auth_url, @opts).should have(3).pages
+        pages << FakePage.new('2', :auth => true)
+        pages << FakePage.new('3', :auth => true)
+        
+        opts = @opts.merge({:http_basic_authentication => AUTH})
+        Anemone.crawl(pages.first.url, opts).should have(4).pages
       end
 
       it "should accept multiple starting URLs" do
