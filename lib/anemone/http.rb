@@ -95,6 +95,13 @@ module Anemone
       @opts[:read_timeout]
     end
 
+    #
+    # HTTP request headers
+    #
+    def http_request_headers
+      @opts[:http_request_headers] || {}
+    end
+
     private
 
     #
@@ -136,6 +143,8 @@ module Anemone
         req = Net::HTTP::Get.new(full_path, opts)
         # HTTP Basic authentication
         req.basic_auth url.user, url.password if url.user
+        # HTTP request headers
+        http_request_headers.each { |header, value| req.add_field(header, value) }
         response = connection(url).request(req)
         finish = Time.now()
         response_time = ((finish - start) * 1000).round

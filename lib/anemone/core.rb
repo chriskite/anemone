@@ -55,7 +55,9 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil
+      :read_timeout => nil,
+      # HTTP request headers
+      :http_request_headers => {}
     }
 
     # Create setter methods for all options to be called from the crawl block
