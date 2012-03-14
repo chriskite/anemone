@@ -169,12 +169,9 @@ module Anemone
         @cookie_store.merge!(resource.meta['set-cookie']) if accept_cookies?
         return resource.read, resource.meta, response_time, resource.status.shift, redirect_to
 
-      rescue Timeout::Error, EOFError => e
-        puts e.inspect if verbose?
+      rescue Timeout::Error, EOFError, Errno::ECONNREFUSED => e
         retries += 1
-        if verbose?
-          puts "[anemone] Retrying ##{retries} on url #{url} because of: #{e.inspect}"
-        end
+        puts "[anemone] Retrying ##{retries} on url #{url} because of: #{e.inspect}" if verbose?
         sleep(2 ^ retries)
         retry unless retries > 5
       end
