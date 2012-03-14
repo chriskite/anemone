@@ -172,7 +172,11 @@ module Anemone
       rescue Timeout::Error, EOFError => e
         puts e.inspect if verbose?
         retries += 1
-        retry unless retries > 3
+        if verbose?
+          puts "[anemone] Retrying ##{retries} on url #{url} because of: #{e.inspect}"
+        end
+        sleep(2 ^ retries)
+        retry unless retries > 5
       end
     end
 
