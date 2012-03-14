@@ -174,6 +174,8 @@ module Anemone
         puts "[anemone] Retrying ##{retries} on url #{url} because of: #{e.inspect}" if verbose?
         sleep(2 ^ retries)
         retry unless retries > 5
+      ensure
+        resource.close if !resource.nil? && !resource.closed?
       end
     end
 
