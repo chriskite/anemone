@@ -28,12 +28,14 @@ module Anemone
     DEFAULT_OPTS = {
       # run 4 Tentacle threads to fetch pages
       :threads => 4,
-      # Prevent page_queue from using excessive RAM. Can indirectly limit rate of crawling. You'll additionally want to use discard_page_bodies and/or a non-memory 'storage' option
+      # Prevent page_queue from using excessive RAM. Can indirectly limit rate of crawling. You'll additionally want to use discard_page_bodies/discard_page_data and/or a non-memory 'storage' option
       :max_page_queue_size => 100,
       # disable verbose output
       :verbose => false,
       # don't throw away the page response body after scanning it for links
       :discard_page_bodies => false,
+      # don't throw away the page data after scanning it for links. 'true' disables after_crawl.
+      :discard_page_data => false,
       # identify self as Anemone/VERSION
       :user_agent => "Anemone/#{Anemone::VERSION}",
       # no delay between requests
@@ -100,6 +102,7 @@ module Anemone
     # is finished
     #
     def after_crawl(&block)
+      raise "after_crawl is incompatible with `:discard_page_data => true`" if @opts[:discard_page_data]
       @after_crawl_blocks << block
       self
     end
@@ -175,7 +178,11 @@ module Anemone
         end
         @pages.touch_keys links
 
-        @pages[page.url] = page
+        if @opts[:discard_page_data]
+          @pages[page.url] = true
+        else
+          @pages[page.url] = page
+        end
 
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?
