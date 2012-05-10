@@ -160,9 +160,11 @@ module Anemone
 
         begin
           resource = open(url, opts)
-        rescue OpenURI::HTTPRedirect => e
-          resource = e.io
-          redirect_to = e.uri
+        rescue OpenURI::HTTPRedirect => e_redirect
+          resource = e_redirect.io
+          redirect_to = e_redirect.uri
+        rescue OpenURI::HTTPError => e_http
+          resource = e_http.io
         end
 
         finish = Time.now()

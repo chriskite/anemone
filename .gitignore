@@ -4,3 +4,5 @@ test.db
 test.tch
 *.kch
 rdoc
+*.bundle
+vendor/
