@@ -5,6 +5,7 @@ module Anemone
   class HTTP
     # Maximum number of redirects to follow on each get_response
     REDIRECT_LIMIT = 5
+    RETRY_LIMIT = 6
 
     # CookieStore for this HTTP client
     attr_reader :cookie_store
@@ -169,11 +170,11 @@ module Anemone
         @cookie_store.merge!(resource.meta['set-cookie']) if accept_cookies?
         return resource.read, resource.meta, response_time, resource.status.shift, redirect_to
 
-      rescue Timeout::Error, EOFError, Errno::ECONNREFUSED => e
+      rescue Timeout::Error, EOFError, Errno::ECONNREFUSED, Errno::ETIMEDOUT, Errno::ECONNRESET => e
         retries += 1
         puts "[anemone] Retrying ##{retries} on url #{url} because of: #{e.inspect}" if verbose?
-        sleep(2 ^ retries)
-        retry unless retries > 5
+        sleep(3 ^ retries)
+        retry unless retries > RETRY_LIMIT
       ensure
         resource.close if !resource.nil? && !resource.closed?
       end
