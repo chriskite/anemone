@@ -47,7 +47,8 @@ module Anemone
           puts e.inspect
           puts e.backtrace
         end
-        return [Page.new(url, :error => e)]
+        pages ||= []
+        return pages << Page.new(url, :error => e)
       end
     end
 
