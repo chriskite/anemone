@@ -126,6 +126,14 @@ module Anemone
       end
     end
 
+    describe "#links" do
+      it "should not convert anchors to %23" do
+        page = @http.fetch_page(FakePage.new('', :body => '<a href="#top">Top</a>').url)
+        page.links.should have(1).link
+        page.links.first.to_s.should == SPEC_DOMAIN
+      end
+    end
+
     it "should detect, store and expose the base url for the page head" do
       base = "#{SPEC_DOMAIN}path/to/base_url/"
       page = @http.fetch_page(FakePage.new('body_test', {:base => base}).url)
