@@ -155,7 +155,7 @@ module Anemone
       page_queue = Queue.new
 
       @opts[:threads].times do
-        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
+        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @robots, @opts).run }
       end
 
       @urls.each{ |url| link_queue.enq(url) }
@@ -196,7 +196,7 @@ module Anemone
 
     def process_options
       @opts = DEFAULT_OPTS.merge @opts
-      @opts[:threads] = 1 if @opts[:delay] > 0
+      @opts[:threads] = 1 if @opts[:delay] > 0 || @opts[:obey_robots_txt]
       storage = Anemone::Storage::Base.new(@opts[:storage] || Anemone::Storage.Hash)
       @pages = PageStore.new(storage)
       @robots = Robotex.new(@opts[:user_agent]) if @opts[:obey_robots_txt]
