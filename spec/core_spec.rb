@@ -305,7 +305,8 @@ module Anemone
                                           :discard_page_bodies => true,
                                           :user_agent => 'test',
                                           :obey_robots_txt => true,
-                                          :depth_limit => 3)
+                                          :depth_limit => 3,
+                                          :http_request_headers => { 'Accept' => 'text/html'})
 
         core.opts[:verbose].should == false
         core.opts[:threads].should == 2
@@ -314,6 +315,7 @@ module Anemone
         core.opts[:user_agent].should == 'test'
         core.opts[:obey_robots_txt].should == true
         core.opts[:depth_limit].should == 3
+        core.opts[:http_request_headers].should == { 'Accept' => 'text/html' }
       end
 
       it "should accept options via setter methods in the crawl block" do
@@ -324,6 +326,7 @@ module Anemone
           a.user_agent = 'test'
           a.obey_robots_txt = true
           a.depth_limit = 3
+          a.http_request_headers = { 'Accept' => 'text/html'}
         end
 
         core.opts[:verbose].should == false
@@ -333,6 +336,7 @@ module Anemone
         core.opts[:user_agent].should == 'test'
         core.opts[:obey_robots_txt].should == true
         core.opts[:depth_limit].should == 3
+        core.opts[:http_request_headers].should == { 'Accept' => 'text/html' }
       end
 
       it "should use 1 thread if a delay is requested" do
