@@ -109,6 +109,22 @@ module Anemone
         core.pages.keys.should_not include(pages[1].url)
         core.pages.keys.should_not include(pages[3].url)
       end
+      
+      it "should be able to follow only links based on a RegEx" do
+        pages = []
+        pages << FakePage.new('0', :links => ['1', '2'])
+        pages << FakePage.new('1')
+        pages << FakePage.new('2')
+        pages << FakePage.new('3')
+
+        core = Anemone.crawl(pages[0].url, @opts) do |a|
+          a.only_links_like /1/, /3/
+        end
+
+        core.should have(2).pages
+        core.pages.keys.should include(pages[1].url)
+        core.pages.keys.should_not include(pages[3].url)
+      end
 
       it "should be able to call a block on every page" do
         pages = []
