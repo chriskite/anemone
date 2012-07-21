@@ -132,11 +132,22 @@ module Anemone
       retries = 0
       begin
         start = Time.now()
-        # format request
-        req = Net::HTTP::Get.new(full_path, opts)
-        # HTTP Basic authentication
-        req.basic_auth url.user, url.password if url.user
-        response = connection(url).request(req)
+	req = nil
+	response = nil
+	if ! @opts[:use_ntlm]
+	        # format request
+	        req = Net::HTTP::Get.new(full_path, opts)
+	        # HTTP Basic authentication
+	        req.basic_auth url.user, url.password if url.user
+	        response = connection(url).request(req)
+	else
+		require 'ntlm/http'
+		# format request
+		req = Net::HTTP::Get.new(full_path, opts)
+		# NTLM authentication
+		req.ntlm_auth(@opts[:ntlm_user], @opts[:ntlm_domain], @opts[:ntlm_password])
+		response = connection(url).request(req)
+	end
         finish = Time.now()
         response_time = ((finish - start) * 1000).round
         @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?

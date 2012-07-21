@@ -55,7 +55,15 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil
+      :read_timeout => nil,
+      # Are we using NTLM protocol ?
+      :use_ntlm => false,
+      # NTLM user name
+      :ntlm_user => nil,
+      # NTLM domain name
+      :ntlm_domain => nil,
+      # NTLM password
+      :ntlm_password => nil
     }
 
     # Create setter methods for all options to be called from the crawl block
