@@ -6,6 +6,7 @@ require 'anemone/exceptions'
 require 'anemone/page_store'
 require 'anemone/storage'
 require 'anemone/storage/base'
+require 'anemone/ext_queue'
 
 module Anemone
 
@@ -55,7 +56,9 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil
+      :read_timeout => nil,
+      # disable support for larg-scale crawls. Activate if you run out of memory during crawls.
+      :large_scale_crawl => false
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -151,29 +154,32 @@ module Anemone
       @urls.delete_if { |url| !visit_link?(url) }
       return if @urls.empty?
 
-      link_queue = Queue.new
-      page_queue = Queue.new
+      link_queue = @opts[:large_scale_crawl] ? ExtQueue.new(10000,"link") : Queue.new
+      page_queue = @opts[:large_scale_crawl] ? ExtQueue.new(600,'page') : Queue.new
 
-      @opts[:threads].times do
-        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
-      end
+      @urls.each{ |url| link_queue.enq([url]) }
 
-      @urls.each{ |url| link_queue.enq(url) }
+      @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts,1).run; }
 
       loop do
         page = page_queue.deq
         @pages.touch_key page.url
-        puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
-        do_page_blocks page
-        page.discard_doc! if @opts[:discard_page_bodies]
 
+        do_page_blocks page
+
+        page.discard_doc! if @opts[:discard_page_bodies]
         links = links_to_follow page
         links.each do |link|
           link_queue << [link, page.url.dup, page.depth + 1]
         end
-        @pages.touch_keys links
 
+        @pages.touch_keys links
         @pages[page.url] = page
+
+        # Add more threads if applicable
+        if link_queue.length > @tentacles.length*2 and @opts[:threads] > @tentacles.length
+          @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts, @tentacles.length+1).run; }
+        end
 
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?
@@ -188,7 +194,9 @@ module Anemone
       end
 
       @tentacles.each { |thread| thread.join }
+
       do_after_crawl_blocks
+
       self
     end
 
