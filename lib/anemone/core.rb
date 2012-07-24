@@ -42,6 +42,10 @@ module Anemone
       :depth_limit => false,
       # number of times HTTP redirects will be followed
       :redirect_limit => 5,
+      # limit the size of the page queue to keep memory usage low
+      :page_queue_size_limit => nil,
+      # limit the size of the link queue to keep memory usage low
+      :link_queue_size_limit => nil,
       # storage engine defaults to Hash in +process_options+ if none specified
       :storage => nil,
       # Hash of cookie name => value to send with HTTP requests
@@ -151,8 +155,8 @@ module Anemone
       @urls.delete_if { |url| !visit_link?(url) }
       return if @urls.empty?
 
-      link_queue = Queue.new
-      page_queue = Queue.new
+      link_queue = build_queue(@opts[:link_queue_size_limit])
+      page_queue = build_queue(@opts[:page_queue_size_limit])
 
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
@@ -296,6 +300,18 @@ module Anemone
     #
     def skip_link?(link)
       @skip_link_patterns.any? { |pattern| link.path =~ pattern }
+    end
+
+    #
+    # Creates a new queue constrained to the given maximum size,
+    # or unconstrained if +size+ is not a positive integer.
+    #
+    def build_queue(size = nil)
+      if size.is_a?(Integer) && size > 0
+        SizedQueue.new(size)
+      else
+        Queue.new
+      end
     end
 
   end
