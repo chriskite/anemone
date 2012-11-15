@@ -79,6 +79,7 @@ module Anemone
       @skip_link_patterns = []
       @after_crawl_blocks = []
       @opts = opts
+      @stop_crawl = false
 
       yield self if block_given?
     end
@@ -143,6 +144,18 @@ module Anemone
     end
 
     #
+    # Signals the crawler that it should stop the crawl before visiting the
+    # next page.
+    #
+    # This method is expected to be called within a page block, and it signals
+    # the crawler that it must stop after the current page is completely
+    # processed.  All pages and links currently on queue are discared.
+    #
+    def stop_crawl
+      @stop_crawl = true
+    end
+
+    #
     # Perform the crawl
     #
     def run
@@ -175,12 +188,17 @@ module Anemone
 
         @pages[page.url] = page
 
+        if @stop_crawl
+          page_queue.clear
+          link_queue.clear
+        end
+
         # if we are done with the crawl, tell the threads to end
         if link_queue.empty? and page_queue.empty?
           until link_queue.num_waiting == @tentacles.size
             Thread.pass
           end
-          if page_queue.empty?
+          if page_queue.empty? || @stop_crawl
             @tentacles.size.times { link_queue << :END }
             break
           end
