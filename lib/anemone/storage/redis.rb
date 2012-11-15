@@ -5,10 +5,12 @@ module Anemone
     class Redis
 
       MARSHAL_FIELDS = %w(links visited fetched)
+      DOZEN_HOURS = 43200
 
       def initialize(opts = {})
         @redis = ::Redis.new(opts)
         @key_prefix = opts[:key_prefix] || 'anemone'
+        @expiration = opts[:key_expiration] || DOZEN_HOURS
         keys.each { |key| delete(key) }
       end
 
@@ -26,6 +28,7 @@ module Anemone
         hash.each do |field, value|
           @redis.hset(rkey, field, value)
         end
+        @redis.expire(rkey, @expiration)
       end
 
       def delete(key)
