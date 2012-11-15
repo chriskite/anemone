@@ -227,6 +227,17 @@ module Anemone
           core = Anemone.crawl(@pages[0].url, @opts.merge({:depth_limit => 3}))
           core.should have(4).pages
         end
+
+        it "should stop crawl if requested" do
+          num_pages = 0
+          Anemone.crawl(@pages[0].url) do |anemone|
+          anemone.on_every_page do
+            num_pages += 1
+            anemone.stop_crawl
+          end
+        end
+        num_pages.should == 1
+        end
       end
 
     end
