@@ -12,6 +12,7 @@ See http://anemone.rubyforge.org for more information.
 * Built-in BFS algorithm for determining page depth
 * Allows exclusion of URLs based on regular expressions
 * Choose the links to follow on each page with focus_crawl()
+* Allows to stop crawl
 * HTTPS support
 * Records response time for each page
 * CLI program can list all pages in a domain, calculate page depths, and more
