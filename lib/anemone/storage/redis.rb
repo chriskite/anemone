@@ -25,9 +25,11 @@ module Anemone
         MARSHAL_FIELDS.each do |field|
           hash[field] = Marshal.dump(hash[field])
         end
+        key_vals = []
         hash.each do |field, value|
-          @redis.hset(rkey, field, value)
+          key_vals += [field, value]
         end
+        @redis.hmset(rkey, key_vals)
         @redis.expire(rkey, @expiration)
       end
 
