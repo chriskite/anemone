@@ -55,7 +55,11 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil
+      :read_timeout => nil,
+      #limit number of crawled pages queue
+      :pages_queue_limit => 1000,
+      #limit number of unique allowed links per crawl (TODO: move links queue to external storage)
+      :links_limit => 500000
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -165,7 +169,7 @@ module Anemone
       return if @urls.empty?
 
       link_queue = Queue.new
-      page_queue = Queue.new
+      page_queue = SizedQueue.new(@opts[:pages_queue_limit])
 
       @opts[:threads].times do
         @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
@@ -181,10 +185,13 @@ module Anemone
         page.discard_doc! if @opts[:discard_page_bodies]
 
         links = links_to_follow page
-        links.each do |link|
-          link_queue << [link, page.url.dup, page.depth + 1]
+        if link_queue.num_waiting < @opts[:links_limit]
+          links.each do |link|
+            link_queue << [link, page.url.dup, page.depth + 1]
+          end
+          @pages.touch_keys links
         end
-        @pages.touch_keys links
+
 
         @pages[page.url] = page
 
