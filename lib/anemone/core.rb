@@ -204,6 +204,7 @@ module Anemone
         if link_queue.empty? and page_queue.empty?
           until link_queue.num_waiting == @tentacles.size
             Thread.pass
+            break unless page_queue.empty? #page queue could be filled again by waiting threads 
           end
           if page_queue.empty? || @stop_crawl
             @tentacles.size.times { link_queue << :END }
