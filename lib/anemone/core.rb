@@ -180,23 +180,22 @@ module Anemone
       loop do
         page = page_queue.deq
         @pages.touch_key page.url
-        puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
+        puts "#{page.url} Queue: #{link_queue.size} PageQueue #{page_queue.size}" if @opts[:verbose]
         do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        links = links_to_follow page
-        if link_queue.num_waiting < @opts[:links_limit]
+
+        if link_queue.size < @opts[:links_limit] and !@stop_crawl
+          links = links_to_follow page
           links.each do |link|
             link_queue << [link, page.url.dup, page.depth + 1]
           end
           @pages.touch_keys links
         end
 
-
         @pages[page.url] = page
 
         if @stop_crawl
-          page_queue.clear
           link_queue.clear
         end
 
@@ -205,7 +204,7 @@ module Anemone
           until link_queue.num_waiting == @tentacles.size
             Thread.pass
           end
-          if page_queue.empty? || @stop_crawl
+          if page_queue.empty? 
             @tentacles.size.times { link_queue << :END }
             break
           end
