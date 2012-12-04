@@ -227,6 +227,37 @@ module Anemone
           core = Anemone.crawl(@pages[0].url, @opts.merge({:depth_limit => 3}))
           core.should have(4).pages
         end
+
+        it "should stop crawl if requested" do
+          num_pages = 0
+          Anemone.crawl(@pages[0].url, @opts.merge({:pages_queue_limit => 1})) do |anemone|
+          anemone.on_every_page do
+            num_pages += 1
+            anemone.stop_crawl if num_pages == 2
+          end
+        end
+        num_pages.should == 2
+        end
+
+        it "should limit number of links per crawl" do
+          num_pages = 0
+          Anemone.crawl(@pages[0].url, @opts.merge({:links_limit => 0})) do |anemone|
+            anemone.on_every_page do
+              num_pages += 1
+            end
+          end
+          num_pages.should == 1
+        end
+
+        it "should limit pages queue per crawl" do
+          num_pages = 0
+          Anemone.crawl(@pages[0].url, @opts.merge({:pages_queue_limit => 1})) do |anemone|
+            anemone.on_every_page do
+              num_pages += 1
+            end
+          end
+          num_pages.should == 5
+        end
       end
 
     end
