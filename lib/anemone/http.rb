@@ -33,13 +33,21 @@ module Anemone
         url = URI(url) unless url.is_a?(URI)
         pages = []
         get(url, referer) do |response, code, location, redirect_to, response_time|
-          pages << Page.new(location, :body => response.body.dup,
-                                      :code => code,
-                                      :headers => response.to_hash,
-                                      :referer => referer,
-                                      :depth => depth,
-                                      :redirect_to => redirect_to,
-                                      :response_time => response_time)
+          body = response.body.dup
+          if response.to_hash.fetch('content-encoding', [])[0] == 'gzip'
+            gzip = Zlib::GzipReader.new(StringIO.new(body))    
+            body = gzip.read
+          end
+          pages << Page.new(
+            location, 
+            :body => body,
+            :code => code,
+            :headers => response.to_hash,
+            :referer => referer,
+            :depth => depth,
+            :redirect_to => redirect_to,
+            :response_time => response_time
+          )
         end
 
         return pages
