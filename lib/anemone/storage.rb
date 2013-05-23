@@ -30,6 +30,11 @@ module Anemone
       self::MongoDB.new(mongo_db, collection_name)
     end
 
+    def self.Mongoid(model_name = 'anemone')
+      require 'anemone/storage/mongoid'
+      self::Mongoid.new(model_name)
+    end
+
     def self.Redis(opts = {})
       require 'anemone/storage/redis'
       self::Redis.new(opts)
