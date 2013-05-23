@@ -63,6 +63,9 @@ module Anemone
         !!@model.where(:url => url.to_s).first
       end
 
+      def close
+      end
+
       private
 
       def load_page(doc)
