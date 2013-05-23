@@ -67,7 +67,7 @@ module Anemone
 
       def load_page(doc)
         BINARY_FIELDS.each do |field|
-          doc.send(field) = doc.send(field).to_s
+          doc[field] = doc[field].to_s
         end
         Page.from_hash(doc)
       end
