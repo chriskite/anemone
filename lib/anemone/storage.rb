@@ -30,7 +30,7 @@ module Anemone
       self::MongoDB.new(mongo_db, collection_name)
     end
 
-    def self.Mongoid(model_name = 'anemone')
+    def self.Mongoid(model_name = 'anemone_page')
       require 'anemone/storage/mongoid'
       self::Mongoid.new(model_name)
     end
