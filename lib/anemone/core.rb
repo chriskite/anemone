@@ -179,15 +179,18 @@ module Anemone
       loop do
         page = page_queue.deq
         @pages.touch_key page.url
-        puts "#{page.url} Queue: #{link_queue.size} PageQueue #{page_queue.size}" if @opts[:verbose]
+        puts "#{page.url} Queue: #{link_queue.size} PageQueue #{page_queue.max}" if @opts[:verbose]
         do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
         if link_queue.size < @opts[:links_limit] and !@stop_crawl
+          puts "links: before" if @opts[:verbose]
           links = links_to_follow page
+          puts "links: #{links.count}" if @opts[:verbose]
           links.each do |link|
             link_queue << [link, page.url.dup, page.depth + 1]
           end
+          puts "touch_keys" if @opts[:verbose]
           @pages.touch_keys links
         end
 
