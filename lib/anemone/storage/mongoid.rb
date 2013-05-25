@@ -28,7 +28,7 @@ module Anemone
         BINARY_FIELDS.each do |field|
           hash[field] = Moped::BSON::Binary.new(:generic, hash[field]) unless hash[field].nil?
         end
-        @model.find_or_create_by(:url => page.url.to_s).update(hash)
+        @model.find_or_create_by(:url => page.url.to_s).update_attributes(hash)
       end
 
       def delete(url)
