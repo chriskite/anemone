@@ -74,7 +74,10 @@ module Anemone
     #
     def doc
       return @doc if @doc
-      @doc = Nokogiri::HTML(@body) if @body && html? rescue nil
+      if @body && html?
+        @body = @body.force_encoding(charset).encode('utf-8') unless (charset == 'utf-8' || charset.nil?) rescue nil
+        @doc = Nokogiri::HTML(@body)
+      end
     end
 
     #
@@ -106,6 +109,11 @@ module Anemone
     def content_type
       headers['content-type'].first
     end
+
+    def charset
+      matcher = content_type.match(/charset=[\"]?([a-zA-Z\-\d]*)[\"]?/)
+      matcher[1].downcase if matcher
+    end    
 
     #
     # Returns +true+ if the page is a HTML document, returns +false+
