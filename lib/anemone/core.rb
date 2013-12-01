@@ -55,7 +55,9 @@ module Anemone
       # proxy server port number
       :proxy_port => false,
       # HTTP read timeout in seconds
-      :read_timeout => nil
+      :read_timeout => nil,
+      # Limit the total pages that are crawled.
+      :limit_pages => nil
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -160,6 +162,11 @@ module Anemone
 
       @urls.each{ |url| link_queue.enq(url) }
 
+      # Use a page counter to limit the pages that should be crawled if opts
+      # are present.
+      semaphore = Mutex.new
+      page_counter = 0
+
       loop do
         page = page_queue.deq
         @pages.touch_key page.url
@@ -185,6 +192,20 @@ module Anemone
             break
           end
         end
+
+        # Synchronize the counter between threads
+        semaphore.synchronize {
+          page_counter += 1
+        }
+
+        if @opts[:limit_pages] && page_counter >= @opts[:limit_pages]
+          until link_queue.num_waiting == @tentacles.size
+            Thread.pass
+          end
+          @tentacles.size.times { link_queue << :END }
+          break
+        end
+
       end
 
       @tentacles.each { |thread| thread.join }
