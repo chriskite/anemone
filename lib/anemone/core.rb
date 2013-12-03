@@ -164,7 +164,6 @@ module Anemone
 
       # Use a page counter to limit the pages that should be crawled if opts
       # are present.
-      semaphore = Mutex.new
       page_counter = 0
 
       loop do
@@ -174,11 +173,23 @@ module Anemone
         do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        links = links_to_follow page
-        links.each do |link|
-          link_queue << [link, page.url.dup, page.depth + 1]
+        if !@opts[:limit_pages] || page_counter < @opts[:limit_pages]
+          links = links_to_follow page
+          if @opts[:limit_pages] && (page_counter + links.length) >= @opts[:limit_pages]
+            # Get the missing link count
+            remaining_slots = @opts[:limit_pages] - page_counter
+            if remaining_slots > 0
+              # Take the missing amount of links
+              links = links.take(remaining_slots)
+            else
+              links = []
+            end
+          end
+          links.each do |link|
+            link_queue << [link, page.url.dup, page.depth + 1]
+          end
+          @pages.touch_keys links
         end
-        @pages.touch_keys links
 
         @pages[page.url] = page
 
@@ -193,19 +204,7 @@ module Anemone
           end
         end
 
-        # Synchronize the counter between threads
-        semaphore.synchronize {
-          page_counter += 1
-        }
-
-        if @opts[:limit_pages] && page_counter >= @opts[:limit_pages]
-          until link_queue.num_waiting == @tentacles.size
-            Thread.pass
-          end
-          @tentacles.size.times { link_queue << :END }
-          break
-        end
-
+        page_counter += 1
       end
 
       @tentacles.each { |thread| thread.join }
