@@ -58,8 +58,9 @@ module Anemone
       return @links unless @links.nil?
       @links = []
       return @links if !doc
+      return @links if doc.search("//meta[@name='robots' and contains(@content, 'noindex') and contains(@content, 'follow')]").any?
 
-      doc.search("//a[@href]").each do |a|
+      doc.search('//a[@href and not(contains(@rel, "nofollow"))]').each do |a|
         u = a['href']
         next if u.nil? or u.empty?
         abs = to_absolute(u) rescue next
