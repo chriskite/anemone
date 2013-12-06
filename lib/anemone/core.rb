@@ -155,16 +155,14 @@ module Anemone
 
       link_queue = Queue.new
       page_queue = Queue.new
+      page_counter = OpenStruct.new(value: 0)
+      sync_counter = Mutex.new
 
       @opts[:threads].times do
-        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, @opts).run }
+        @tentacles << Thread.new { Tentacle.new(link_queue, page_queue, page_counter, sync_counter, @opts).run }
       end
 
       @urls.each{ |url| link_queue.enq(url) }
-
-      # Use a page counter to limit the pages that should be crawled if opts
-      # are present.
-      page_counter = 0
 
       loop do
         page = page_queue.deq
@@ -173,11 +171,19 @@ module Anemone
         do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        if !@opts[:limit_pages] || page_counter < @opts[:limit_pages]
+        current_counter = nil
+
+        if @opts[:limit_pages]
+          sync_counter.synchronize {
+            current_counter = page_counter.value
+          }
+        end
+
+        if !@opts[:limit_pages] || current_counter < @opts[:limit_pages]
           links = links_to_follow page
-          if @opts[:limit_pages] && (page_counter + links.length) >= @opts[:limit_pages]
+          if @opts[:limit_pages] && (current_counter + links.length) >= @opts[:limit_pages]
             # Get the missing link count
-            remaining_slots = @opts[:limit_pages] - page_counter
+            remaining_slots = @opts[:limit_pages] - current_counter
             if remaining_slots > 0
               # Take the missing amount of links
               links = links.take(remaining_slots)
@@ -203,8 +209,6 @@ module Anemone
             break
           end
         end
-
-        page_counter += 1
       end
 
       @tentacles.each { |thread| thread.join }

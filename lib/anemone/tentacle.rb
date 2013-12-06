@@ -6,9 +6,11 @@ module Anemone
     #
     # Create a new Tentacle
     #
-    def initialize(link_queue, page_queue, opts = {})
+    def initialize(link_queue, page_queue, page_counter, sync_counter, opts = {})
       @link_queue = link_queue
       @page_queue = page_queue
+      @page_counter = page_counter
+      @sync_counter = sync_counter
       @http = Anemone::HTTP.new(opts)
       @opts = opts
     end
@@ -23,7 +25,27 @@ module Anemone
 
         break if link == :END
 
-        @http.fetch_pages(link, referer, depth).each { |page| @page_queue << page }
+        current_counter = nil
+        if @opts[:limit_pages]
+          @sync_counter.synchronize {
+            current_counter = @page_counter.value
+          }
+        end
+
+        result = []
+        if !current_counter || current_counter < @opts[:limit_pages]
+          result = @http.fetch_pages(link, referer, depth)
+        end
+
+        result = result.take(@opts[:limit_pages] - current_counter) if current_counter
+
+        result.each { |page| @page_queue << page }
+
+        if current_counter && result.count > 0
+          @sync_counter.synchronize {
+            @page_counter.value += result.count
+          }
+        end
 
         delay
       end
