@@ -50,7 +50,7 @@ module Anemone
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
       :skip_query_strings => false,
-      # proxy server hostname 
+      # proxy server hostname
       :proxy_host => nil,
       # proxy server port number
       :proxy_port => false,
@@ -164,10 +164,11 @@ module Anemone
         page = page_queue.deq
         @pages.touch_key page.url
         puts "#{page.url} Queue: #{link_queue.size}" if @opts[:verbose]
+
         do_page_blocks page
+        links = links_to_follow page
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        links = links_to_follow page
         links.each do |link|
           link_queue << [link, page.url.dup, page.depth + 1]
         end
@@ -281,7 +282,7 @@ module Anemone
         false
       end
     end
-    
+
     #
     # Returns +true+ if *link* should not be visited because
     # it has a query string and +skip_query_strings+ is true.
