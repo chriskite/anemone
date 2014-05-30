@@ -58,7 +58,6 @@ module Anemone
     # Array of distinct A tag HREFs from the page
     #
     def links
-      puts doc.search("//a/@href").map(&:text)
       return @links unless @links.nil?
       @links = []
       return @links if !doc
