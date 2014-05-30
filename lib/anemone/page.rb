@@ -58,10 +58,10 @@ module Anemone
     # Array of distinct A tag HREFs from the page
     #
     def links
+      puts doc.search("//a/@href").map(&:text)
       return @links unless @links.nil?
       @links = []
       return @links if !doc
-
       doc.search("//a[@href]").each do |a|
         u = a['href']
         next if u.nil? or u.empty?
@@ -172,7 +172,7 @@ module Anemone
     # +false+ otherwise
     #
     def in_domain?(uri)
-      puts "#{uri.host} == @url.host"
+      puts "#{uri.host} == #{@url.host}"
       if @ignore_www_subdomain
         uri.host.gsub(/^www\./, '') == @url.host.gsub(/^www\./, '')
       else
