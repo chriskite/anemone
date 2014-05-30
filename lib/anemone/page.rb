@@ -29,6 +29,8 @@ module Anemone
     attr_accessor :referer
     # Response time of the request for this page in milliseconds
     attr_accessor :response_time
+    # If visiting a domain like http://exaple.com and the page includes a link to http://www.example.com, then visit it anyways.
+    attr_accessor :ignore_www_subdomain
 
     #
     # Create a new page
@@ -47,6 +49,7 @@ module Anemone
       @response_time = params[:response_time]
       @body = params[:body]
       @error = params[:error]
+      @ignore_www_subdomain = params[:ignore_www_subdomain]
 
       @fetched = !params[:code].nil?
     end
@@ -58,7 +61,6 @@ module Anemone
       return @links unless @links.nil?
       @links = []
       return @links if !doc
-
       doc.search("//a[@href]").each do |a|
         u = a['href']
         next if u.nil? or u.empty?
@@ -169,15 +171,20 @@ module Anemone
     # +false+ otherwise
     #
     def in_domain?(uri)
-      uri.host == @url.host
+      puts "#{uri.host} == #{@url.host}"
+      if @ignore_www_subdomain
+        uri.host.gsub(/^www\./, '') == @url.host.gsub(/^www\./, '')
+      else
+        uri.host == @url.host
+      end
     end
 
     def marshal_dump
-      [@url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @redirect_to, @response_time, @fetched]
+      [@url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @ignore_www_subdomain, @redirect_to, @response_time, @fetched]
     end
 
     def marshal_load(ary)
-      @url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @redirect_to, @response_time, @fetched = ary
+      @url, @headers, @data, @body, @links, @code, @visited, @depth, @referer, @ignore_www_subdomain, @redirect_to, @response_time, @fetched = ary
     end
 
     def to_hash
@@ -192,6 +199,7 @@ module Anemone
        'referer' => @referer.to_s,
        'redirect_to' => @redirect_to.to_s,
        'response_time' => @response_time,
+       'ignore_www_subdomain' => @ignore_www_subdomain,
        'fetched' => @fetched}
     end
 
@@ -207,6 +215,7 @@ module Anemone
        '@referer' => hash['referer'],
        '@redirect_to' => (!!hash['redirect_to'] && !hash['redirect_to'].empty?) ? URI(hash['redirect_to']) : nil,
        '@response_time' => hash['response_time'].to_i,
+       '@ignore_www_subdomain' => hash['ignore_www_subdomain'],
        '@fetched' => hash['fetched']
       }.each do |var, value|
         page.instance_variable_set(var, value)
