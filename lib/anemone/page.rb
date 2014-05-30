@@ -172,6 +172,7 @@ module Anemone
     # +false+ otherwise
     #
     def in_domain?(uri)
+      puts "#{uri.host} == @url.host"
       if @ignore_www_subdomain
         uri.host.gsub(/^www\./, '') == @url.host.gsub(/^www\./, '')
       else
