@@ -4,3 +4,4 @@ test.db
 test.tch
 *.kch
 rdoc
+*.gem
