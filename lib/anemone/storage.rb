@@ -40,7 +40,7 @@ module Anemone
       self::SQLite3.new(file)
     end
 
-    def self.SQLite3(opts = {})
+    def self.MySQL(opts = {})
       require 'anemone/storage/mysql'
       self::MySQL.new(opts)
     end

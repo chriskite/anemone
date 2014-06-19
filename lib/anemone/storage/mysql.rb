@@ -1,3 +1,5 @@
+# coding: utf-8
+
 begin
   require 'mysql2'
 rescue LoadError
@@ -10,12 +12,16 @@ module Anemone
     class MySQL
 
       def initialize(opts = {})
-        @db = Mysql2::Client.new(:host => "localhost", :username => "crawler", :password => "anemone_pass", :database => "anemone")
+        host = opts[:host] || 'localhost'
+        username = opts[:username] || 'crawler'
+        password = opts[:password] || 'anemone_pass'
+        database = opts[:database] || 'anemone'
+        @db = Mysql2::Client.new(:host => #{host}, :username => #{username}, :password => #{password}, :database => #{database})
         create_schema
       end
 
       def [](url)
-        value = @db.get_first_value('SELECT data FROM anemone_storage WHERE page_key = ?', url.to_s)
+        value = @db.query("SELECT data FROM anemone_storage WHERE page_key = '#{get_hash_value(url)}'").first['data']
         if value
           Marshal.load(value)
         end
@@ -23,16 +29,17 @@ module Anemone
 
       def []=(url, value)
         data = Marshal.dump(value)
+        key = get_hash_value(url)
         if has_key?(url)
-          @db.execute('UPDATE anemone_storage SET page_data = ? WHERE page_key = ?', data, url.to_s)
+          @db.query("UPDATE anemone_storage SET page_data = '#{data}' WHERE page_key = '#{key}'")
         else
-          @db.execute('INSERT INTO anemone_storage (page_data, page_key) VALUES(?, ?)', data, url.to_s)
+          @db.query("INSERT INTO anemone_storage (page_key, page_data) VALUES('#{key}', '#{data}')")
         end
       end
 
       def delete(url)
         page = self[url]
-        @db.execute('DELETE FROM anemone_storage WHERE page_key = ?', url.to_s)
+        @db.query("DELETE FROM anemone_storage WHERE page_key = '#{get_hash_value(url)}'")
         page
       end
 
@@ -49,15 +56,21 @@ module Anemone
       end
 
       def size
-        @db.get_first_value('SELECT COUNT(id) FROM anemone_storage')
+        @db.query('SELECT COUNT(*) FROM anemone_storage')
       end
 
       def keys
-        @db.execute("SELECT page_key FROM anemone_storage ORDER BY id").map{|t| t[0]}
+        @db.query("SELECT page_key FROM anemone_storage ORDER BY id").map{|t| t[0]}
       end
 
       def has_key?(url)
-        !!@db.get_first_value('SELECT id FROM anemone_storage WHERE page_key = ?', url.to_s)
+        key = get_hash_value(url)
+        result = @db.query("SELECT count(id) FROM anemone_storage WHERE page_key = '#{key}'")
+        if result.first['count(id)'] > 0
+          return true
+        else
+          return false
+        end
       end
 
       def close
@@ -85,6 +98,9 @@ SQL
         Page.from_hash(hash)
       end
 
+      def get_hash_value(key)
+        Digest::SHA1.hexdigest(key)
+      end
     end
   end
 end
