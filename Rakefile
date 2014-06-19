@@ -1,5 +1,5 @@
 require 'rspec/core/rake_task'
-require 'rake/rdoctask'
+require 'rdoc/task'
 
 desc "Run all specs"
 RSpec::Core::RakeTask.new(:rspec) do |spec|
@@ -13,7 +13,7 @@ end
 
 task :default => :rspec
 
-Rake::RDocTask.new(:rdoc) do |rdoc|
+RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
