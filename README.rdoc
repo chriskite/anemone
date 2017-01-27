@@ -1,5 +1,21 @@
 = Anemone
 
+The following paragraph prefaces the Anemone gem, developed by Chris Kite.
+This repo is a fork of that gem. Why fork, you ask? His gem is very nice,
+and makes crawling a simple task. To that, I concur. Unfortunately, the 
+HTTP methods it uses are subject to SIGPIPE failures - nasty signals
+that tear the crawler up internally, and while it does not necessarily "fail"
+per say, it can hang the crawler and throw the program into a bastardized form of 
+deadlock. While I hope that soon these changes will be incorporated and merged
+into the project itself, I need to host my fork for the time being. As such,
+feel free to use my fork. I promise that it is AT LEAST as good (if not better...
+which I currently maintain that it is) than the anemone gem as it currently stands.
+
+Happy crawling!
+
+
+== PRE-FORK ANEMONE
+
 Anemone is a web spider framework that can spider a domain and collect useful
 information about the pages it visits. It is versatile, allowing you to
 write your own specialized spider tasks quickly and easily.

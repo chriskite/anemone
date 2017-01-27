@@ -21,7 +21,12 @@ module Anemone
     # Just gets the final destination page.
     #
     def fetch_page(url, referer = nil, depth = nil)
-      fetch_pages(url, referer, depth).last
+      begin
+	fetch_pages(url, referer, depth).last
+      rescue Errno::EPIPE => e
+      	puts "CAUGHT AN EPIPE in FETCH_PAGE...RE-RAISING" if verbose?
+	raise e
+      end
     end
 
     #
@@ -29,9 +34,21 @@ module Anemone
     # including redirects
     #
     def fetch_pages(url, referer = nil, depth = nil)
+
+      ####
+      ## This should never happen, as you have to
+      ## explicitly pass all three in as nil.
+      ## Then again, who knows....
+      ####
+      if url.nil? && referer.nil? && depth.nil?
+        puts "Must have been an error in the Tentacle thread..." if verbose?
+	p = [ Page.new(":DEADLOCK", :error => Exception.new) ]
+	return p
+      end
+
+      pages = []
       begin
         url = URI(url) unless url.is_a?(URI)
-        pages = []
         get(url, referer) do |response, code, location, redirect_to, response_time|
           pages << Page.new(location, :body => response.body.dup,
                                       :code => code,
@@ -41,14 +58,19 @@ module Anemone
                                       :redirect_to => redirect_to,
                                       :response_time => response_time)
         end
-
-        return pages
       rescue Exception => e
-        if verbose?
+        if e.inspect.to_s.include?("Errno::EPIPE")
+	  puts "CAUGHT A EPIPE IN HTTP" if verbose?
+	end
+        pages << Page.new(url, :error => e)
+	if verbose?
           puts e.inspect
           puts e.backtrace
         end
-        return [Page.new(url, :error => e)]
+      ensure
+	# Sadly, this ensure block is relatively critical
+        puts "Is pages nil? #{pages.nil?}" if verbose? && pages.nil?
+        return pages
       end
     end
 
@@ -103,6 +125,7 @@ module Anemone
     # for each response.
     #
     def get(url, referer = nil)
+      trap("SIGPIPE") { puts "CAUGHT A SIGPIPE IN HTTP!!! Like cowards, we choose to not re-raise" if verbose? ; Anemone.increment_pipes}
       limit = redirect_limit
       loc = url
       begin
@@ -115,6 +138,10 @@ module Anemone
           redirect_to = response.is_a?(Net::HTTPRedirection) ? URI(response['location']).normalize : nil
           yield response, code, loc, redirect_to, response_time
           limit -= 1
+      rescue 
+        ## TODO : why am I re-raising errors like trapeze artists jumping 
+	##        from method to method....
+	raise $!
       end while (loc = redirect_to) && allowed?(redirect_to, url) && limit > 0
     end
 
@@ -141,7 +168,7 @@ module Anemone
         response_time = ((finish - start) * 1000).round
         @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?
         return response, response_time
-      rescue Timeout::Error, Net::HTTPBadResponse, EOFError => e
+      rescue Timeout::Error, Net::HTTPBadResponse, EOFError, Errno::EPIPE => e
         puts e.inspect if verbose?
         refresh_connection(url)
         retries += 1
