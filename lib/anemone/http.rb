@@ -89,6 +89,19 @@ module Anemone
     end
 
     #
+    # The proxy username
+    #
+    def proxy_user
+      @opts[:proxy_user]
+    end
+     #
+    # The proxy password
+    #
+    def proxy_pass
+      @opts[:proxy_pass]
+    end
+
+    #
     # HTTP read timeout in seconds
     #
     def read_timeout
@@ -160,7 +173,7 @@ module Anemone
     end
 
     def refresh_connection(url)
-      http = Net::HTTP.new(url.host, url.port, proxy_host, proxy_port)
+      http = Net::HTTP.new(url.host, url.port, proxy_host, proxy_port, proxy_user, proxy_pass)
 
       http.read_timeout = read_timeout if !!read_timeout
 
@@ -169,7 +182,7 @@ module Anemone
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
-      @connections[url.host][url.port] = http.start 
+      @connections[url.host][url.port] = http.start
     end
 
     def verbose?
