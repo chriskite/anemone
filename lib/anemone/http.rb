@@ -10,15 +10,9 @@ module Anemone
     # CookieStore for this HTTP client
     attr_reader :cookie_store
 
-    # loger for testing purposes
-    def my_logger
-      @@my_logger ||= Logger.new("#{Rails.root}/log/anemone.log")
-    end
-
     def initialize(opts = {})
       @connections = {}
       @opts = opts
-      my_logger.info "initialize @opts : #{@opts.to_json}"
       @cookie_store = CookieStore.new(@opts[:cookies])
     end
 
@@ -143,12 +137,6 @@ module Anemone
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
 
-      proxy_options = {}
-      proxy_options = @opts
-      my_logger.info "-----------------------------------------------------------------------------"
-      my_logger.info("proxy_host : #{proxy_host}")
-      my_logger.info("proxy_options[:proxy_host] in get_response : #{proxy_options["proxy_host"]}")
-      my_logger.info "-----------------------------------------------------------------------------"
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
@@ -157,19 +145,16 @@ module Anemone
       retries = 0
       begin
         start = Time.now()
-
-        my_logger.info "\n get_response => @opts[:proxy_host].blank? : #{proxy_options[:proxy_host].blank?}"
-        my_logger.info "\n get_response => proxy_port.blank? : #{proxy_port.blank?}"
-        my_logger.info "\n get_response => proxy_user.blank? : #{proxy_user.blank?}"
-        my_logger.info "\n get_response => proxy_pass.blank? : #{proxy_pass.blank?}"
-        my_logger.info "\n get_response => (proxy_user.blank? || proxy_pass.blank?) : #{(proxy_user.blank? || proxy_pass.blank?)}"
+        #
         # proxy with authentication
-        proxy = Net::HTTP::Proxy('zproxy.lum-superproxy.io', 22225, 'lum-customer-hl_11d4972f-zone-us_zone-country-us', 'cygnzsx3hwq9') # unless (proxy_user.blank? || proxy_pass.blank?)
-        my_logger.info "\n get_response => proxy.present? : #{proxy.present?}"
+        proxy = Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass) unless (proxy_user.blank? || proxy_pass.blank?)
+        #
         # format request
         req = Net::HTTP::Get.new(full_path, opts)
+        #
         # HTTP Basic authentication
         req.basic_auth url.user, url.password if url.user
+
         if proxy.present?
           response = proxy.start(url.host,url.port, :use_ssl => url.scheme == 'https') do |http|
             http.request(req)
