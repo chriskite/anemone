@@ -10,6 +10,11 @@ module Anemone
     # CookieStore for this HTTP client
     attr_reader :cookie_store
 
+    # loger for testing purposes
+    def my_logger
+      @@my_logger ||= Logger.new("#{Rails.root}/log/anemone.log")
+    end
+
     def initialize(opts = {})
       @connections = {}
       @opts = opts
@@ -145,8 +150,13 @@ module Anemone
       retries = 0
       begin
         start = Time.now()
+
+        my_logger.info "\n get_response => proxy_user.blank? : #{proxy_user.blank?}"
+        my_logger.info "\n get_response => proxy_pass.blank? : #{proxy_pass.blank?}"
+        my_logger.info "\n get_response => (proxy_user.blank? || proxy_pass.blank?) : #{(proxy_user.blank? || proxy_pass.blank?)}"
         # proxy with authentication
         proxy = Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass) unless (proxy_user.blank? || proxy_pass.blank?)
+        my_logger.info "\n get_response => proxy.present? : #{proxy.present?}"
         # format request
         req = Net::HTTP::Get.new(full_path, opts)
         # HTTP Basic authentication
