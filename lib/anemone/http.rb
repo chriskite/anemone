@@ -62,7 +62,7 @@ module Anemone
     # The maximum number of redirects to follow
     #
     def redirect_limit
-      @opts[:redirect_limit] || REDIRECT_LIMIT
+      @opts["redirect_limit"] || REDIRECT_LIMIT
     end
 
     #
@@ -70,48 +70,48 @@ module Anemone
     # or nil if no such option is set
     #
     def user_agent
-      @opts[:user_agent]
+      @opts["user_agent"]
     end
 
     #
     # Does this HTTP client accept cookies from the server?
     #
     def accept_cookies?
-      @opts[:accept_cookies]
+      @opts["accept_cookies"]
     end
 
     #
     # The proxy address string
     #
     def proxy_host
-      @opts[:proxy_host]
+      @opts["proxy_host"]
     end
 
     #
     # The proxy port
     #
     def proxy_port
-      @opts[:proxy_port]
+      @opts["proxy_port"]
     end
 
     #
     # The proxy username
     #
     def proxy_user
-      @opts[:proxy_user]
+      @opts["proxy_user"]
     end
     #
     # The proxy password
     #
     def proxy_pass
-      @opts[:proxy_pass]
+      @opts["proxy_pass"]
     end
 
     #
     # HTTP read timeout in seconds
     #
     def read_timeout
-      @opts[:read_timeout]
+      @opts["read_timeout"]
     end
 
     private
@@ -146,7 +146,7 @@ module Anemone
       proxy_options = {}
       proxy_options = @opts
       my_logger.info "-----------------------------------------------------------------------------"
-      my_logger.info("proxy_options in get_response : #{proxy_options.to_json}")
+      my_logger.info("proxy_host : #{proxy_host}")
       my_logger.info("proxy_options[:proxy_host] in get_response : #{proxy_options["proxy_host"]}")
       my_logger.info "-----------------------------------------------------------------------------"
       opts = {}
