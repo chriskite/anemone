@@ -164,7 +164,7 @@ module Anemone
         # HTTP Basic authentication
         req.basic_auth url.user, url.password if url.user
         if proxy.present?
-          response = proxy.start(url.host,url.port, :use_ssl => uri.scheme == 'https') do |http|
+          response = proxy.start(url.host,url.port, :use_ssl => url.scheme == 'https') do |http|
             http.request(req)
           end
         else
