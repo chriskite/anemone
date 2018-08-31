@@ -145,7 +145,10 @@ module Anemone
 
       proxy_options = {}
       proxy_options = @opts
-      my_logger.info("proxy_options in get_response : #{proxy_options[:proxy_host]}")
+      my_logger.info "-----------------------------------------------------------------------------"
+      my_logger.info("proxy_options in get_response : #{proxy_options,.to_json}")
+      my_logger.info("proxy_options[:proxy_host] in get_response : #{proxy_options[:proxy_host]}")
+      my_logger.info "-----------------------------------------------------------------------------"
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
