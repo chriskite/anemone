@@ -146,7 +146,7 @@ module Anemone
       proxy_options = {}
       proxy_options = @opts
       my_logger.info "-----------------------------------------------------------------------------"
-      my_logger.info("proxy_options in get_response : #{proxy_options,.to_json}")
+      my_logger.info("proxy_options in get_response : #{proxy_options.to_json}")
       my_logger.info("proxy_options[:proxy_host] in get_response : #{proxy_options[:proxy_host]}")
       my_logger.info "-----------------------------------------------------------------------------"
       opts = {}
