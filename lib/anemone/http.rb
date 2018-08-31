@@ -143,7 +143,9 @@ module Anemone
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
       my_logger.info("@options in get_response : #{@opts.to_json}")
-      opts = @opts
+      proxy_options = {}
+      proxy_options = @opts
+      opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
       opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty? || (!accept_cookies? && @opts[:cookies].nil?)
@@ -152,7 +154,7 @@ module Anemone
       begin
         start = Time.now()
 
-        my_logger.info "\n get_response => @opts[:proxy_host].blank? : #{opts[:proxy_host].blank?}"
+        my_logger.info "\n get_response => @opts[:proxy_host].blank? : #{proxy_options[:proxy_host].blank?}"
         my_logger.info "\n get_response => proxy_port.blank? : #{proxy_port.blank?}"
         my_logger.info "\n get_response => proxy_user.blank? : #{proxy_user.blank?}"
         my_logger.info "\n get_response => proxy_pass.blank? : #{proxy_pass.blank?}"
