@@ -145,11 +145,20 @@ module Anemone
       retries = 0
       begin
         start = Time.now()
+        # proxy with authentication
+        proxy = Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass) unless (proxy_user.blank? || proxy_pass.blank?)
         # format request
         req = Net::HTTP::Get.new(full_path, opts)
         # HTTP Basic authentication
         req.basic_auth url.user, url.password if url.user
-        response = connection(url).request(req)
+        if proxy.present?
+          response = proxy.start(url.host,url.port, :use_ssl => uri.scheme == 'https') do |http|
+            http.request(req)
+          end
+        else
+          response = connection(url).request(req)
+        end
+
         finish = Time.now()
         response_time = ((finish - start) * 1000).round
         @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?
