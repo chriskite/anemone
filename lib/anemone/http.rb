@@ -142,9 +142,10 @@ module Anemone
     #
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
-      my_logger.info("@options in get_response : #{@opts.to_json}")
+
       proxy_options = {}
       proxy_options = @opts
+      my_logger.info("proxy_options in get_response : #{proxy_options.to_json}")
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
