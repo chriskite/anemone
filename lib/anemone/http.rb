@@ -6,7 +6,7 @@ module Anemone
   class HTTP
     # Maximum number of redirects to follow on each get_response
     REDIRECT_LIMIT = 5
-    @@opts = {}
+
     # CookieStore for this HTTP client
     attr_reader :cookie_store
 
@@ -17,9 +17,9 @@ module Anemone
 
     def initialize(opts = {})
       @connections = {}
-      @@opts = opts
-      my_logger.info "initialize @opts : #{@@opts.to_json}"
-      @cookie_store = CookieStore.new(@@opts[:cookies])
+      @opts = opts
+      my_logger.info "initialize @opts : #{@opts.to_json}"
+      @cookie_store = CookieStore.new(@opts[:cookies])
     end
 
     #
@@ -62,7 +62,7 @@ module Anemone
     # The maximum number of redirects to follow
     #
     def redirect_limit
-      @@opts[:redirect_limit] || REDIRECT_LIMIT
+      @opts[:redirect_limit] || REDIRECT_LIMIT
     end
 
     #
@@ -70,48 +70,48 @@ module Anemone
     # or nil if no such option is set
     #
     def user_agent
-      @@opts[:user_agent]
+      @opts[:user_agent]
     end
 
     #
     # Does this HTTP client accept cookies from the server?
     #
     def accept_cookies?
-      @@opts[:accept_cookies]
+      @opts[:accept_cookies]
     end
 
     #
     # The proxy address string
     #
     def proxy_host
-      @@opts[:proxy_host]
+      @opts[:proxy_host]
     end
 
     #
     # The proxy port
     #
     def proxy_port
-      @@opts[:proxy_port]
+      @opts[:proxy_port]
     end
 
     #
     # The proxy username
     #
     def proxy_user
-      @@opts[:proxy_user]
+      @opts[:proxy_user]
     end
     #
     # The proxy password
     #
     def proxy_pass
-      @@opts[:proxy_pass]
+      @opts[:proxy_pass]
     end
 
     #
     # HTTP read timeout in seconds
     #
     def read_timeout
-      @@opts[:read_timeout]
+      @opts[:read_timeout]
     end
 
     private
@@ -142,17 +142,17 @@ module Anemone
     #
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
-
+      my_logger.info("@options in get_response : #{@opts.to_json}")
       opts = {}
       opts['User-Agent'] = user_agent if user_agent
       opts['Referer'] = referer.to_s if referer
-      opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty? || (!accept_cookies? && @@opts[:cookies].nil?)
+      opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty? || (!accept_cookies? && @opts[:cookies].nil?)
 
       retries = 0
       begin
         start = Time.now()
 
-        my_logger.info "\n get_response => @opts[:proxy_host].blank? : #{@@opts[:proxy_host]}"
+        my_logger.info "\n get_response => @opts[:proxy_host].blank? : #{@opts[:proxy_host].blank?}"
         my_logger.info "\n get_response => proxy_port.blank? : #{proxy_port.blank?}"
         my_logger.info "\n get_response => proxy_user.blank? : #{proxy_user.blank?}"
         my_logger.info "\n get_response => proxy_pass.blank? : #{proxy_pass.blank?}"
@@ -208,7 +208,7 @@ module Anemone
     end
 
     def verbose?
-      @@opts[:verbose]
+      @opts[:verbose]
     end
 
     #
