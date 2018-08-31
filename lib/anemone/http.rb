@@ -18,6 +18,7 @@ module Anemone
     def initialize(opts = {})
       @connections = {}
       @opts = opts
+      my_logger.info "initialize @opts : #{@opts.to_json}"
       @cookie_store = CookieStore.new(@opts[:cookies])
     end
 
