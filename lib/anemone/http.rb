@@ -143,10 +143,10 @@ module Anemone
     def get_response(url, referer = nil)
       full_path = url.query.nil? ? url.path : "#{url.path}?#{url.query}"
       my_logger.info("@options in get_response : #{@opts.to_json}")
-      opts = {}
-      opts['User-Agent'] = user_agent if user_agent
-      opts['Referer'] = referer.to_s if referer
-      opts['Cookie'] = @cookie_store.to_s unless @cookie_store.empty? || (!accept_cookies? && @opts[:cookies].nil?)
+      opts1 = {}
+      opts1['User-Agent'] = user_agent if user_agent
+      opts1['Referer'] = referer.to_s if referer
+      opts1['Cookie'] = @cookie_store.to_s unless @cookie_store.empty? || (!accept_cookies? && @opts[:cookies].nil?)
 
       retries = 0
       begin
@@ -161,7 +161,7 @@ module Anemone
         proxy = Net::HTTP::Proxy('zproxy.lum-superproxy.io', 22225, 'lum-customer-hl_11d4972f-zone-us_zone-country-us', 'cygnzsx3hwq9') # unless (proxy_user.blank? || proxy_pass.blank?)
         my_logger.info "\n get_response => proxy.present? : #{proxy.present?}"
         # format request
-        req = Net::HTTP::Get.new(full_path, opts)
+        req = Net::HTTP::Get.new(full_path, opts1)
         # HTTP Basic authentication
         req.basic_auth url.user, url.password if url.user
         if proxy.present?
