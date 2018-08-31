@@ -152,7 +152,7 @@ module Anemone
       begin
         start = Time.now()
 
-        my_logger.info "\n get_response => proxy_host.blank? : #{proxy_host.blank?}"
+        my_logger.info "\n get_response => @opts[:proxy_host].blank? : #{@opts[:proxy_host]}"
         my_logger.info "\n get_response => proxy_port.blank? : #{proxy_port.blank?}"
         my_logger.info "\n get_response => proxy_user.blank? : #{proxy_user.blank?}"
         my_logger.info "\n get_response => proxy_pass.blank? : #{proxy_pass.blank?}"
