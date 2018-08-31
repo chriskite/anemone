@@ -99,7 +99,7 @@ module Anemone
     def proxy_user
       @opts[:proxy_user]
     end
-     #
+    #
     # The proxy password
     #
     def proxy_pass
@@ -151,11 +151,13 @@ module Anemone
       begin
         start = Time.now()
 
+        my_logger.info "\n get_response => proxy_host.blank? : #{proxy_host.blank?}"
+        my_logger.info "\n get_response => proxy_port.blank? : #{proxy_port.blank?}"
         my_logger.info "\n get_response => proxy_user.blank? : #{proxy_user.blank?}"
         my_logger.info "\n get_response => proxy_pass.blank? : #{proxy_pass.blank?}"
         my_logger.info "\n get_response => (proxy_user.blank? || proxy_pass.blank?) : #{(proxy_user.blank? || proxy_pass.blank?)}"
         # proxy with authentication
-        proxy = Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass) unless (proxy_user.blank? || proxy_pass.blank?)
+        proxy = Net::HTTP::Proxy('zproxy.lum-superproxy.io', 22225, 'lum-customer-hl_11d4972f-zone-us_zone-country-us', 'cygnzsx3hwq9') # unless (proxy_user.blank? || proxy_pass.blank?)
         my_logger.info "\n get_response => proxy.present? : #{proxy.present?}"
         # format request
         req = Net::HTTP::Get.new(full_path, opts)
