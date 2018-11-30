@@ -56,7 +56,7 @@ module Anemone
     # The maximum number of redirects to follow
     #
     def redirect_limit
-      @opts[:redirect_limit] || REDIRECT_LIMIT
+      @opts["redirect_limit"] || REDIRECT_LIMIT
     end
 
     #
@@ -64,35 +64,48 @@ module Anemone
     # or nil if no such option is set
     #
     def user_agent
-      @opts[:user_agent]
+      @opts["user_agent"]
     end
 
     #
     # Does this HTTP client accept cookies from the server?
     #
     def accept_cookies?
-      @opts[:accept_cookies]
+      @opts["accept_cookies"]
     end
 
     #
     # The proxy address string
     #
     def proxy_host
-      @opts[:proxy_host]
+      @opts["proxy_host"]
     end
 
     #
     # The proxy port
     #
     def proxy_port
-      @opts[:proxy_port]
+      @opts["proxy_port"]
+    end
+
+    #
+    # The proxy username
+    #
+    def proxy_user
+      @opts["proxy_user"]
+    end
+    #
+    # The proxy password
+    #
+    def proxy_pass
+      @opts["proxy_pass"]
     end
 
     #
     # HTTP read timeout in seconds
     #
     def read_timeout
-      @opts[:read_timeout]
+      @opts["read_timeout"]
     end
 
     private
@@ -132,11 +145,24 @@ module Anemone
       retries = 0
       begin
         start = Time.now()
+        #
+        # proxy with authentication
+        proxy = Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass) unless (proxy_user.blank? || proxy_pass.blank?)
+        #
         # format request
         req = Net::HTTP::Get.new(full_path, opts)
+        #
         # HTTP Basic authentication
         req.basic_auth url.user, url.password if url.user
-        response = connection(url).request(req)
+
+        if proxy.present?
+          response = proxy.start(url.host,url.port, :use_ssl => url.scheme == 'https') do |http|
+            http.request(req)
+          end
+        else
+          response = connection(url).request(req)
+        end
+
         finish = Time.now()
         response_time = ((finish - start) * 1000).round
         @cookie_store.merge!(response['Set-Cookie']) if accept_cookies?
@@ -160,7 +186,7 @@ module Anemone
     end
 
     def refresh_connection(url)
-      http = Net::HTTP.new(url.host, url.port, proxy_host, proxy_port)
+      http = Net::HTTP.new(url.host, url.port, proxy_host, proxy_port, proxy_user, proxy_pass)
 
       http.read_timeout = read_timeout if !!read_timeout
 
@@ -169,7 +195,7 @@ module Anemone
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
-      @connections[url.host][url.port] = http.start 
+      @connections[url.host][url.port] = http.start
     end
 
     def verbose?
