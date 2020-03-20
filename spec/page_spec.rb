@@ -143,42 +143,46 @@ module Anemone
 
     it "should have a method to convert a relative url to an absolute one" do
       @page.should respond_to(:to_absolute)
-      
-      # Identity
-      @page.to_absolute(@page.url).should == @page.url
-      @page.to_absolute("").should == @page.url
-      
-      # Root-ness
-      @page.to_absolute("/").should == URI("#{SPEC_DOMAIN}")
-      
-      # Relativeness
-      relative_path = "a/relative/path"
-      @page.to_absolute(relative_path).should == URI("#{SPEC_DOMAIN}#{relative_path}")
-      
-      deep_page = @http.fetch_page(FakePage.new('home/deep', :links => '1').url)
-      upward_relative_path = "../a/relative/path"
-      deep_page.to_absolute(upward_relative_path).should == URI("#{SPEC_DOMAIN}#{relative_path}")
-      
-      # The base URL case
-      base_path = "path/to/base_url/"
-      base = "#{SPEC_DOMAIN}#{base_path}"
-      page = @http.fetch_page(FakePage.new('home', {:base => base}).url)
-      
-      # Identity
-      page.to_absolute(page.url).should == page.url
-      # It should revert to the base url
-      page.to_absolute("").should_not == page.url
 
-      # Root-ness
-      page.to_absolute("/").should == URI("#{SPEC_DOMAIN}")
-      
-      # Relativeness
-      relative_path = "a/relative/path"
-      page.to_absolute(relative_path).should == URI("#{base}#{relative_path}")
-      
-      upward_relative_path = "../a/relative/path"
-      upward_base = "#{SPEC_DOMAIN}path/to/"
-      page.to_absolute(upward_relative_path).should == URI("#{upward_base}#{relative_path}")      
+      [true, false].each do |bool|
+        @page.stub(:ruby27?).and_return(bool)
+
+        # Identity
+        @page.to_absolute(@page.url).should == @page.url
+        @page.to_absolute("").should == @page.url
+
+        # Root-ness
+        @page.to_absolute("/").should == URI("#{SPEC_DOMAIN}")
+
+        # Relativeness
+        relative_path = "a/relative/path"
+        @page.to_absolute(relative_path).should == URI("#{SPEC_DOMAIN}#{relative_path}")
+
+        deep_page = @http.fetch_page(FakePage.new('home/deep', :links => '1').url)
+        upward_relative_path = "../a/relative/path"
+        deep_page.to_absolute(upward_relative_path).should == URI("#{SPEC_DOMAIN}#{relative_path}")
+
+        # The base URL case
+        base_path = "path/to/base_url/"
+        base = "#{SPEC_DOMAIN}#{base_path}"
+        page = @http.fetch_page(FakePage.new('home', {:base => base}).url)
+
+        # Identity
+        page.to_absolute(page.url).should == page.url
+        # It should revert to the base url
+        page.to_absolute("").should_not == page.url
+
+        # Root-ness
+        page.to_absolute("/").should == URI("#{SPEC_DOMAIN}")
+
+        # Relativeness
+        relative_path = "a/relative/path"
+        page.to_absolute(relative_path).should == URI("#{base}#{relative_path}")
+
+        upward_relative_path = "../a/relative/path"
+        upward_base = "#{SPEC_DOMAIN}path/to/"
+        page.to_absolute(upward_relative_path).should == URI("#{upward_base}#{relative_path}")
+      end
     end
 
   end

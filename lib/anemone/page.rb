@@ -154,7 +154,12 @@ module Anemone
       return nil if link.nil?
 
       # remove anchor
-      link = URI.encode(URI.decode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,'')))
+      if ruby27?
+        require 'cgi'
+        link = CGI.unescape(CGI.escape(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,'')))
+      else
+        link = URI.encode(URI.decode(link.to_s.gsub(/#[a-zA-Z0-9_-]*$/,'')))
+      end
 
       relative = URI(link)
       absolute = base ? base.merge(relative) : @url.merge(relative)
@@ -193,6 +198,10 @@ module Anemone
        'redirect_to' => @redirect_to.to_s,
        'response_time' => @response_time,
        'fetched' => @fetched}
+    end
+
+    def ruby27?
+      Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
     end
 
     def self.from_hash(hash)
